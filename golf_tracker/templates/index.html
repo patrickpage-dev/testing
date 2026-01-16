@@ -9,8 +9,12 @@
 <body>
     <div class="container">
         <h1>Golf Practice Sessions</h1>
-        <a href="{{ url_for('add_session') }}" class="button">Add New Session</a>
-        <a href="{{ url_for('journal_list') }}" class="button">Go to Golf Journal</a>
+        <div class="main-nav-buttons">
+            <a href="{{ url_for('add_session') }}" class="button">Add New Session</a>
+            <a href="{{ url_for('journal_list') }}" class="button">Go to Golf Journal</a>
+            <a href="{{ url_for('export_sessions_csv') }}" class="button export-button">Export Sessions to CSV</a>
+            <button id="theme-toggle" class="button">Toggle Dark Mode</button>
+        </div>
         <div class="sessions-list">
             {% for session in sessions %}
             <div class="session-card">
@@ -29,5 +33,6 @@
             <p>Follow me on Instagram: <a href="https://www.instagram.com/pattparz_/" target="_blank">@pattyparz_</a></p>
         </div>
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

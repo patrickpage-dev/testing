@@ -10,6 +10,7 @@
     <div class="container">
         <h1>Golf Journal</h1>
         <a href="{{ url_for('add_journal_entry') }}" class="button">Add New Journal Entry</a>
+        <a href="{{ url_for('export_journal_csv') }}" class="button export-button">Export Journal to CSV</a>
         <div class="journal-list">
             {% for entry in entries %}
             <div class="session-card">

@@ -13,6 +13,7 @@
             <h2>{{ session.session_type }} - {{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</h2>
             <p>Subjective Feel: {{ session.subjective_feel }}/5</p>
             <a href="{{ url_for('add_drill', session_id=session.id) }}" class="button">Add Another Drill to this Session</a>
+            <a href="{{ url_for('export_drills_csv', session_id=session.id) }}" class="button export-button">Export Drills to CSV</a>
         </div>
 
         <h2>Drills for this Session</h2>

@@ -8,6 +8,13 @@ body {
     color: #f0e9d6; /* Cream color for body text */
 }
 
+/* Dark Mode Styles */
+body.dark-mode {
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('https://source.unsplash.com/random/1920x1080/?golf-course-night') no-repeat center center fixed;
+    background-size: cover;
+    color: #e0e0e0; /* Lighter text for dark backgrounds */
+}
+
 .container {
     width: 75%; /* Slightly narrower for a more focused look */
     margin: 30px auto;
@@ -15,6 +22,11 @@ body {
     padding: 25px;
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* Deeper shadow */
+}
+
+body.dark-mode .container {
+    background: #333333; /* Darker background for container in dark mode */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6); 
 }
 
 h1 {
@@ -26,6 +38,18 @@ h1 {
     letter-spacing: 2px;
 }
 
+body.dark-mode h1 {
+    color: #8bc34a; /* Lighter green for headings in dark mode */
+}
+
+.main-nav-buttons {
+    display: flex;
+    justify-content: flex-start; /* Align buttons to the start */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    gap: 15px; /* Space between buttons */
+    margin-bottom: 20px;
+}
+
 .button {
     display: inline-block;
     background: #004d2a; /* Augusta green button */
@@ -33,8 +57,6 @@ h1 {
     padding: 12px 20px;
     border-radius: 5px;
     text-decoration: none;
-    margin-top: 15px;
-    margin-bottom: 15px;
     text-align: center;
     font-weight: bold;
     transition: background-color 0.3s ease;
@@ -42,6 +64,15 @@ h1 {
 
 .button:hover {
     background: #003a20; /* Darker green on hover */
+}
+
+body.dark-mode .button {
+    background: #558B2F; /* Darker green for buttons in dark mode */
+    color: #e0e0e0;
+}
+
+body.dark-mode .button:hover {
+    background: #33691E; /* Even darker green on hover */
 }
 
 .sessions-list {
@@ -59,6 +90,14 @@ h1 {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+body.dark-mode .session-card,
+body.dark-mode .drill-card {
+    background: #424242; /* Darker background for cards in dark mode */
+    color: #e0e0e0; /* Lighter text for cards in dark mode */
+    border: 1px solid #616161;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 .session-card h2,
 .drill-card h3 {
     margin-top: 0;
@@ -67,9 +106,18 @@ h1 {
     margin-bottom: 10px;
 }
 
+body.dark-mode .session-card h2,
+body.dark-mode .drill-card h3 {
+    color: #aed581; /* Lighter green for card titles in dark mode */
+}
+
 .session-card p, .drill-card p {
     color: #555;
     margin-bottom: 5px;
+}
+
+body.dark-mode .session-card p, body.dark-mode .drill-card p {
+    color: #bdbdbd;
 }
 
 form label {
@@ -79,9 +127,14 @@ form label {
     color: #004d2a; /* Augusta green for form labels */
 }
 
+body.dark-mode form label {
+    color: #aed581;
+}
+
 form input[type="text"],
 form input[type="number"],
-form select {
+form select,
+form textarea {
     width: calc(100% - 22px);
     padding: 12px;
     margin-bottom: 20px;
@@ -90,6 +143,15 @@ form select {
     color: #333;
     background-color: #ffffff;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode form input[type="text"],
+body.dark-mode form input[type="number"],
+body.dark-mode form select,
+body.dark-mode form textarea {
+    background-color: #505050;
+    color: #e0e0e0;
+    border: 1px solid #757575;
 }
 
 form button[type="submit"] {
@@ -105,13 +167,22 @@ form button[type="submit"] {
     transition: background-color 0.3s ease;
 }
 
-form button[type="submit"]:hover {
-    background: #003a20; /* Darker green on hover */
+body.dark-mode form button[type="submit"] {
+    background: #558B2F;
+    color: #e0e0e0;
+}
+
+body.dark-mode form button[type="submit"]:hover {
+    background: #33691E;
 }
 
 a {
     color: #004d2a; /* Augusta green for links */
     text-decoration: none;
+}
+
+body.dark-mode a {
+    color: #aed581;
 }
 
 a:hover {
@@ -134,9 +205,17 @@ a:hover {
     font-weight: bold;
 }
 
+body.dark-mode .personal-branding {
+    color: #aed581;
+}
+
 .personal-branding a {
     color: #b09c57; /* Gold/Cream for Instagram link */
     font-weight: bold;
+}
+
+body.dark-mode .personal-branding a {
+    color: #ffd700; /* Gold for Instagram link in dark mode */
 }
 
 .personal-branding a:hover {

@@ -1,5 +1,7 @@
 import sqlite3
-from flask import Flask, render_template, request, g, redirect, url_for
+import csv
+import io
+from flask import Flask, render_template, request, g, redirect, url_for, make_response
 
 DATABASE = 'instance/golf_tracker.db'
 
@@ -123,6 +125,56 @@ def journal_details(entry_id):
         return "Journal entry not found", 404
     
     return render_template('journal_details.html', entry=entry)
+
+@app.route('/export/sessions_csv')
+def export_sessions_csv():
+    db = get_db()
+    sessions = db.execute('SELECT id, session_type, session_date, subjective_feel FROM sessions').fetchall()
+
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['ID', 'Session Type', 'Session Date', 'Subjective Feel'])
+    cw.writerows(sessions)
+    
+    response = make_response(si.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=golf_sessions.csv'
+    response.headers['Content-type'] = 'text/csv'
+    return response
+
+@app.route('/export/drills_csv/<int:session_id>')
+def export_drills_csv(session_id):
+    db = get_db()
+    drills = db.execute(
+        'SELECT id, drill_name, club, target_distance, balls_hit, success_metric FROM drills WHERE session_id = ?',
+        (session_id,)
+    ).fetchall()
+
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['ID', 'Drill Name', 'Club', 'Target Distance', 'Balls Hit', 'Success Metric'])
+    cw.writerows(drills)
+    
+    response = make_response(si.getvalue())
+    response.headers['Content-Disposition'] = f'attachment; filename=session_{session_id}_drills.csv'
+    response.headers['Content-type'] = 'text/csv'
+    return response
+
+@app.route('/export/journal_csv')
+def export_journal_csv():
+    db = get_db()
+    entries = db.execute(
+        'SELECT id, entry_date, round_stats, notes_before_round, notes_after_round, mental_state, physical_state, weather FROM journal_entries'
+    ).fetchall()
+
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['ID', 'Entry Date', 'Round Stats', 'Notes Before Round', 'Notes After Round', 'Mental State', 'Physical State', 'Weather'])
+    cw.writerows(entries)
+    
+    response = make_response(si.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=golf_journal.csv'
+    response.headers['Content-type'] = 'text/csv'
+    return response
 
 @app.route('/session/<int:session_id>')
 def session_details(session_id):
