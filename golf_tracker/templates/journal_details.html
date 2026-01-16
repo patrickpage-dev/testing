@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Journal Entry Details</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Journal Entry Details</h1>
+        <div class="session-card">
+            <h2>Entry on {{ entry.entry_date.strftime('%Y-%m-%d %H:%M') }}</h2>
+            <p><strong>Round Stats:</strong> {{ entry.round_stats if entry.round_stats else 'N/A' }}</p>
+            <p><strong>Notes Before Round:</strong> {{ entry.notes_before_round if entry.notes_before_round else 'N/A' }}</p>
+            <p><strong>Notes After Round:</strong> {{ entry.notes_after_round if entry.notes_after_round else 'N/A' }}</p>
+            <p><strong>Mental State:</strong> {{ entry.mental_state if entry.mental_state else 'N/A' }}</p>
+            <p><strong>Physical State:</strong> {{ entry.physical_state if entry.physical_state else 'N/A' }}</p>
+            <p><strong>Weather:</strong> {{ entry.weather if entry.weather else 'N/A' }}</p>
+        </div>
+        <p><a href="{{ url_for('journal_list') }}">Back to Journal Entries</a></p>
+        <p><a href="{{ url_for('index') }}">Back to Practice Sessions</a></p>
+    </div>
+</body>
+</html>

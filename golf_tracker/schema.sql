@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS drills;
 DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS journal_entries;
 
 CREATE TABLE sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,4 +18,15 @@ CREATE TABLE drills (
     balls_hit INTEGER,
     success_metric TEXT,
     FOREIGN KEY (session_id) REFERENCES sessions (id)
+);
+
+CREATE TABLE journal_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    round_stats TEXT,
+    notes_before_round TEXT,
+    notes_after_round TEXT,
+    mental_state TEXT,
+    physical_state TEXT,
+    weather TEXT
 );

@@ -14,7 +14,18 @@
             <input type="text" id="drill_name" name="drill_name" required>
 
             <label for="club">Club:</label>
-            <input type="text" id="club" name="club">
+            <select id="club" name="club">
+                <option value="">-- Select Club --</option>
+                <option value="Driver">Driver</option>
+                <option value="Fairway Wood">Fairway Wood</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Long Iron (2-4)">Long Iron (2-4)</option>
+                <option value="Mid Iron (5-7)">Mid Iron (5-7)</option>
+                <option value="Short Iron (8-PW)">Short Iron (8-PW)</option>
+                <option value="Wedge (GW, SW, LW)">Wedge (GW, SW, LW)</option>
+                <option value="Putter">Putter</option>
+                <option value="Other">Other</option>
+            </select>
 
             <label for="target_distance">Target Distance (yards):</label>
             <input type="number" id="target_distance" name="target_distance">
