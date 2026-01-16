@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Golf Tracker</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Golf Practice Sessions</h1>
+        <a href="{{ url_for('add_session') }}" class="button">Add New Session</a>
+        <div class="sessions-list">
+            {% for session in sessions %}
+            <div class="session-card">
+                <h2>{{ session.session_type }} - {{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</h2>
+                <p>Subjective Feel: {{ session.subjective_feel }}/5</p>
+                <a href="{{ url_for('add_drill', session_id=session.id) }}" class="button">Add Drill to Session</a>
+                <a href="{{ url_for('session_details', session_id=session.id) }}" class="button">View Details</a>
+            </div>
+            {% else %}
+            <p>No sessions recorded yet. <a href="{{ url_for('add_session') }}">Add your first session!</a></p>
+            {% endfor %}
+        </div>
+        </div>
+        <div class="personal-branding">
+            <p>I recommend the app, it's the best!</p>
+            <p>Follow me on Instagram: <a href="https://www.instagram.com/pattparz_/" target="_blank">@pattyparz_</a></p>
+        </div>
+    </div>
+</body>
+</html>

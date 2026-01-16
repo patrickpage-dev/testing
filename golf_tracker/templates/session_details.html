@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Session Details</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Session Details</h1>
+        <div class="session-card">
+            <h2>{{ session.session_type }} - {{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</h2>
+            <p>Subjective Feel: {{ session.subjective_feel }}/5</p>
+            <a href="{{ url_for('add_drill', session_id=session.id) }}" class="button">Add Another Drill to this Session</a>
+        </div>
+
+        <h2>Drills for this Session</h2>
+        <div class="drills-list">
+            {% if drills %}
+                {% for drill in drills %}
+                <div class="drill-card">
+                    <h3>{{ drill.drill_name }}</h3>
+                    <p>Club: {{ drill.club if drill.club else 'N/A' }}</p>
+                    <p>Target Distance: {{ drill.target_distance if drill.target_distance else 'N/A' }}</p>
+                    <p>Balls Hit: {{ drill.balls_hit if drill.balls_hit else 'N/A' }}</p>
+                    <p>Success Metric: {{ drill.success_metric if drill.success_metric else 'N/A' }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No drills recorded for this session yet.</p>
+            {% endif %}
+        </div>
+        <p><a href="{{ url_for('index') }}">Back to All Sessions</a></p>
+    </div>
+</body>
+</html>

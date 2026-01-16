@@ -1,0 +1,144 @@
+body {
+    font-family: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(rgba(0, 77, 42, 0.7), rgba(0, 77, 42, 0.7)), url('https://source.unsplash.com/random/1920x1080/?augusta-golf-course') no-repeat center center fixed;
+    background-size: cover;
+    color: #f0e9d6; /* Cream color for body text */
+}
+
+.container {
+    width: 75%; /* Slightly narrower for a more focused look */
+    margin: 30px auto;
+    background: #f0e9d6; /* Cream background for content */
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* Deeper shadow */
+}
+
+h1 {
+    color: #004d2a; /* Rich Augusta green for headings */
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.button {
+    display: inline-block;
+    background: #004d2a; /* Augusta green button */
+    color: #f0e9d6; /* Cream text */
+    padding: 12px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background: #003a20; /* Darker green on hover */
+}
+
+.sessions-list {
+    margin-top: 30px;
+}
+
+.session-card,
+.drill-card {
+    background: #ffffff; /* Clean white background for cards */
+    color: #333; /* Dark text for readability */
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9; /* Light green border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.session-card h2,
+.drill-card h3 {
+    margin-top: 0;
+    color: #004d2a; /* Augusta green for card titles */
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+.session-card p, .drill-card p {
+    color: #555;
+    margin-bottom: 5px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #004d2a; /* Augusta green for form labels */
+}
+
+form input[type="text"],
+form input[type="number"],
+form select {
+    width: calc(100% - 22px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #c8e6c9;
+    border-radius: 5px;
+    color: #333;
+    background-color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+form button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #004d2a; /* Augusta green submit button */
+    color: #f0e9d6;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+    background: #003a20; /* Darker green on hover */
+}
+
+a {
+    color: #004d2a; /* Augusta green for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.drill-card .button {
+    background: #6a9955; /* Slightly different green for add drill button */
+}
+
+.drill-card .button:hover {
+    background: #5a8844;
+}
+
+.personal-branding {
+    margin-top: 40px;
+    text-align: center;
+    color: #004d2a; /* Augusta green for the branding text */
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.personal-branding a {
+    color: #b09c57; /* Gold/Cream for Instagram link */
+    font-weight: bold;
+}
+
+.personal-branding a:hover {
+    text-decoration: underline;
+}
