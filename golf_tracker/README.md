@@ -90,6 +90,53 @@ If you already have a database and want to apply schema updates without wiping d
 flask --app app migrate-db
 ```
 
+## Troubleshooting (Common "It Doesn't Work" Errors)
+
+1. **App crashes immediately: `RuntimeError: SECRET_KEY not set`**
+
+   **Why it happens:** `app.py` requires `SECRET_KEY` unless debug mode is enabled.
+
+   **Fix (PowerShell):**
+
+   ```powershell
+   $env:FLASK_DEBUG="1"
+   # OR
+   $env:SECRET_KEY="some-long-random-string"
+   ```
+
+2. **Module not found errors**
+
+   **Why it happens:** The venv is missing required packages like `flask_wtf`, `flask_login`, or `flask_limiter`.
+
+   **Fix:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Database errors like `no such table: users`**
+
+   **Why it happens:** The SQLite DB exists but has not been initialized or migrated.
+
+   **Fix:**
+
+   ```bash
+   flask --app app init-db
+   flask --app app migrate-db
+   ```
+
+4. **Migration fails: `Cannot enforce NOT NULL user_id`**
+
+   **Why it happens:** Old rows still have `user_id` set to `NULL` and migration `0002` refuses to run.
+
+   **Fix:** Assign a user to those rows before migrating, or delete the DB if you do not need existing data.
+
+5. **Running from a different working directory breaks DB path**
+
+   **Why it happens:** The DB path is relative (`instance/golf_tracker.db`), so running from elsewhere can create a new empty DB.
+
+   **Fix:** Always run from the project root or convert the DB path to an absolute path using `app.instance_path`.
+
 ## How to Use
 
 1.  **Run the Flask application**:
