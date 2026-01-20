@@ -1,92 +1,95 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Add Scorecard for {{ course_name }}</title>
-</head>
-<body>
-    <div class="container">
-        <header class="site-header">
-            <div class="brand">
-                <h1>Golf Practice Tracker</h1>
-                <div class="tagline">Improvement happens here</div>
-                <div class="auth-meta">Signed in as {{ current_user.username }}</div>
-            </div>
-            <div class="site-nav">
-                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
-                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
-                <form method="post" action="{{ url_for('logout') }}" class="inline-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-ghost">Log Out</button>
-                </form>
-            </div>
-        </header>
+{% extends "base.html" %}
 
-        <h1 class="page-title">Add Scorecard for {{ course_name }}</h1>
-        <p class="page-subtitle">Journal Entry ID: {{ journal_entry.id }}</p>
+{% block title %}Golf Scoresheet - Golf Practice Tracker{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">GOLF SCORESHEET</h1>
+    
+    <div class="card scoresheet-card">
+        <div class="scoresheet-info">
+            <div class="scoresheet-info-item">
+                <strong>Course:</strong> {{ course_name }}
+            </div>
+            <div class="scoresheet-info-item">
+                <strong>Date:</strong> {{ journal_entry.entry_date.strftime('%b %d, %Y') if hasattr(journal_entry, 'entry_date') else 'Today' }}
+            </div>
+        </div>
+        
         {% if error %}
         <p class="alert">{{ error }}</p>
         {% endif %}
+        
         <form method="post" class="form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="scorecard-wrap">
-                <table class="table scorecard-table" data-scorecard>
+                <table class="table scorecard-table scoresheet-table" data-scorecard>
                     <thead>
-                        <tr>
-                            <th class="row-label">Hole</th>
+                        <tr class="scoresheet-header">
+                            <th class="row-label">HOLE</th>
                             {% for hole in holes %}
                                 <th>{{ hole.hole_number }}</th>
                                 {% if hole.hole_number == 9 %}
-                                    <th>Out</th>
+                                    <th>OUT</th>
                                 {% endif %}
                                 {% if hole.hole_number == 18 %}
-                                    <th>In</th>
-                                    <th>Total</th>
+                                    <th>IN</th>
+                                    <th>TOT</th>
+                                    <th>+/-</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        <tr class="scoresheet-header">
+                            <th class="row-label">DISTANCE</th>
+                            {% for hole in holes %}
+                                <td class="scoresheet-cell">{{ hole.distance if hole.distance else '-' }}</td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell">-</td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell">-</td>
+                                    <td class="total-cell">-</td>
+                                    <td class="total-cell">-</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        <tr class="scoresheet-header">
+                            <th class="row-label">PAR</th>
+                            {% for hole in holes %}
+                                <td class="scoresheet-cell" data-par-value="{{ hole.par }}">{{ hole.par }}</td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell" data-par-total="out">{{ par_out }}</td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell" data-par-total="in">{{ par_in }}</td>
+                                    <td class="total-cell" data-par-total="total">{{ par_total }}</td>
+                                    <td class="total-cell">-</td>
                                 {% endif %}
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th class="row-label">Par</th>
-                            {% for hole in holes %}
-                                <td class="scorecell" data-score-type="par" data-score-value="{{ hole.par }}">{{ hole.par }}</td>
-                                {% if hole.hole_number == 9 %}
-                                    <td class="total-cell">{{ par_out }}</td>
-                                {% endif %}
-                                {% if hole.hole_number == 18 %}
-                                    <td class="total-cell">{{ par_in }}</td>
-                                    <td class="total-cell">{{ par_total }}</td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
                         {% if previous_entry_label %}
-                        <tr>
+                        <tr class="scoresheet-row">
                             <th class="row-label">Last Round ({{ previous_entry_label }})</th>
                             {% for hole in holes %}
                                 {% set last_score = last_scores.get(hole.hole_number) %}
-                                <td class="scorecell" data-score-type="last" data-score-value="{{ last_score if last_score is not none else '' }}">{{ last_score if last_score is not none else '-' }}</td>
+                                <td class="scoresheet-cell">{{ last_score if last_score is not none else '-' }}</td>
                                 {% if hole.hole_number == 9 %}
                                     <td class="total-cell">{{ last_out if last_out is not none else '-' }}</td>
                                 {% endif %}
                                 {% if hole.hole_number == 18 %}
                                     <td class="total-cell">{{ last_in if last_in is not none else '-' }}</td>
                                     <td class="total-cell">{{ last_total if last_total is not none else '-' }}</td>
+                                    <td class="total-cell">-</td>
                                 {% endif %}
                             {% endfor %}
                         </tr>
                         {% endif %}
-                        <tr>
-                            <th class="row-label">This Round</th>
+                        <tr class="scoresheet-row scoresheet-input-row">
+                            <th class="row-label">SCORE</th>
                             {% for hole in holes %}
                                 <td>
-                                    <input class="score-input" type="number" id="hole_{{ hole.hole_number }}_score" name="hole_{{ hole.hole_number }}_score" min="1" value="{{ scores_data.get(hole.hole_number, '') }}" data-score-type="current" data-hole-number="{{ hole.hole_number }}" required>
+                                    <input class="score-input scoresheet-input" type="number" id="hole_{{ hole.hole_number }}_score" name="hole_{{ hole.hole_number }}_score" min="1" value="{{ scores_data.get(hole.hole_number, '') }}" data-score-type="current" data-hole-number="{{ hole.hole_number }}" data-par="{{ hole.par }}" required>
                                 </td>
                                 {% if hole.hole_number == 9 %}
                                     <td class="total-cell"><span data-total-for="current-out">0</span></td>
@@ -94,19 +97,17 @@
                                 {% if hole.hole_number == 18 %}
                                     <td class="total-cell"><span data-total-for="current-in">0</span></td>
                                     <td class="total-cell"><span data-total-for="current-total">0</span></td>
+                                    <td class="total-cell"><span data-total-for="current-to-par">0</span></td>
                                 {% endif %}
                             {% endfor %}
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <button type="submit" class="btn btn-primary">Save Scorecard</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Scorecard</button>
+                <a href="{{ url_for('journal_details', entry_id=journal_entry.id) }}" class="btn btn-ghost">Cancel</a>
+            </div>
         </form>
-        <p style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <a href="{{ url_for('journal_details', entry_id=journal_entry.id) }}" class="btn btn-ghost">Back to Journal Entry Details</a>
-            <a href="{{ url_for('course_details', course_id=course_id) }}" class="btn btn-ghost">View Course History</a>
-        </p>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% endblock %}

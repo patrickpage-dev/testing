@@ -1,92 +1,85 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Add Journal Entry</title>
-</head>
-<body>
-    <div class="container">
-        <header class="site-header">
-            <div class="brand">
-                <h1>Golf Practice Tracker</h1>
-                <div class="tagline">Improvement happens here</div>
-                <div class="auth-meta">Signed in as {{ current_user.username }}</div>
-            </div>
-            <div class="site-nav">
-                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
-                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
-                <form method="post" action="{{ url_for('logout') }}" class="inline-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-ghost">Log Out</button>
-                </form>
-            </div>
-        </header>
+{% extends "base.html" %}
 
-        <h1 class="page-title">Add New Journal Entry</h1>
-        <form method="post" class="form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="field">
-                <label for="course_id">Golf Course:</label>
-                <select id="course_id" name="course_id">
-                    <option value="">-- Select Course (Optional) --</option>
-                    {% for course in courses %}
-                    <option value="{{ course.id }}">{{ course.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+{% block title %}Add Journal Entry - Golf Practice Tracker{% endblock %}
 
-            <div class="field">
-                <label for="notes_before_round">Notes Before Round:</label>
-                <textarea id="notes_before_round" name="notes_before_round" rows="4"></textarea>
+{% block content %}
+    <h1 class="page-title">Add New Journal Entry</h1>
+    
+    <form method="post" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="card">
+            <div class="form-section">
+                <h3 class="form-section-title">Round Information</h3>
+                <div class="field">
+                    <label for="course_id">Golf Course:</label>
+                    <select id="course_id" name="course_id">
+                        <option value="">-- Select Course (Optional) --</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-hint">Select a course to enable scorecard tracking</small>
+                </div>
             </div>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+            <div class="form-section">
+                <h3 class="form-section-title">Notes & Reflection</h3>
+                <div class="field">
+                    <label for="notes_before_round">Notes Before Round:</label>
+                    <textarea id="notes_before_round" name="notes_before_round" rows="4" placeholder="How are you feeling? What's your game plan?"></textarea>
+                </div>
 
-            <div class="field">
-                <label for="notes_after_round">Notes After Round:</label>
-                <textarea id="notes_after_round" name="notes_after_round" rows="4"></textarea>
+                <div class="field">
+                    <label for="notes_after_round">Notes After Round:</label>
+                    <textarea id="notes_after_round" name="notes_after_round" rows="4" placeholder="What went well? What needs work?"></textarea>
+                </div>
             </div>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+            <div class="form-section">
+                <h3 class="form-section-title">Conditions & State</h3>
+                <div class="field">
+                    <label for="mental_state">Mental State:</label>
+                    <select id="mental_state" name="mental_state">
+                        <option value="">-- Select State --</option>
+                        <option value="Calm & Focused">Calm & Focused</option>
+                        <option value="Confident">Confident</option>
+                        <option value="Anxious">Anxious</option>
+                        <option value="Frustrated">Frustrated</option>
+                        <option value="Distracted">Distracted</option>
+                        <option value="Motivated">Motivated</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
 
-            <div class="field">
-                <label for="mental_state">Mental State:</label>
-                <select id="mental_state" name="mental_state">
-                    <option value="">-- Select State --</option>
-                    <option value="Calm & Focused">Calm & Focused</option>
-                    <option value="Confident">Confident</option>
-                    <option value="Anxious">Anxious</option>
-                    <option value="Frustrated">Frustrated</option>
-                    <option value="Distracted">Distracted</option>
-                    <option value="Motivated">Motivated</option>
-                    <option value="Other">Other</option>
-                </select>
+                <div class="field">
+                    <label for="physical_state">Physical State:</label>
+                    <select id="physical_state" name="physical_state">
+                        <option value="">-- Select State --</option>
+                        <option value="Rested">Rested</option>
+                        <option value="Tired">Tired</option>
+                        <option value="Energized">Energized</option>
+                        <option value="Minor Ache/Pain">Minor Ache/Pain</option>
+                        <option value="Injured">Injured</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="weather">Weather:</label>
+                    <input type="text" id="weather" name="weather" placeholder="e.g., Sunny, 75°F, Light Wind">
+                    <small class="field-hint">Describe the weather conditions</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Journal Entry</button>
+                    <a href="{{ url_for('journal_list') }}" class="btn btn-ghost">Cancel</a>
+                </div>
             </div>
-
-            <div class="field">
-                <label for="physical_state">Physical State:</label>
-                <select id="physical_state" name="physical_state">
-                    <option value="">-- Select State --</option>
-                    <option value="Rested">Rested</option>
-                    <option value="Tired">Tired</option>
-                    <option value="Energized">Energized</option>
-                    <option value="Minor Ache/Pain">Minor Ache/Pain</option>
-                    <option value="Injured">Injured</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label for="weather">Weather:</label>
-                <input type="text" id="weather" name="weather" placeholder="e.g., Sunny, 75F, Light Wind">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add Journal Entry</button>
-        </form>
-        <p style="margin-top: 20px;"><a href="{{ url_for('journal_list') }}" class="btn btn-ghost">Back to Journal Entries</a></p>
-    </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+        </div>
+    </form>
+{% endblock %}

@@ -1,71 +1,62 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='3') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Golf Tracker</title>
-</head>
-<body>
-    <div class="container">
-        <header class="site-header">
-            <div class="brand">
-                <h1>Golf Practice Tracker</h1>
-                <div class="tagline">Improvement happens here</div>
-                {% if current_user.is_authenticated %}
-                    <div class="auth-meta">Signed in as {{ current_user.username }}</div>
-                {% endif %}
-            </div>
-            <div class="site-nav">
-                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
-                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
-                {% if current_user.is_authenticated %}
-                    <form method="post" action="{{ url_for('logout') }}" class="inline-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-ghost">Log Out</button>
-                    </form>
-                {% else %}
-                    <a class="btn btn-ghost" href="{{ url_for('login') }}">Log In</a>
-                    <a class="btn btn-ghost" href="{{ url_for('register') }}">Sign Up</a>
-                {% endif %}
-            </div>
-        </header>
+{% extends "base.html" %}
 
-        <div class="page-actions">
-            <a class="btn btn-primary" href="{{ url_for('add_session') }}">+ New Session</a>
-            <a class="btn" href="{{ url_for('export_sessions_csv') }}">Export</a>
-            <button id="theme-toggle" class="btn btn-ghost">Toggle Dark Mode</button>
+{% block title %}Dashboard - Golf Practice Tracker{% endblock %}
+
+{% block content %}
+    {% if stats %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Sessions This Week</div>
+            <div class="stat-value">{{ stats.sessions_this_week }}</div>
         </div>
-
-        <h2 class="page-title">Practice Sessions</h2>
-        <p class="page-subtitle">Log, review, and refine your training.</p>
-
-        <div class="grid">
-            {% for session in sessions %}
-            <div class="card half">
-                <div class="badge {{ session.session_type.replace(' ', '') }}">{{ session.session_type }}</div>
-                <h3>{{ session.session_date.strftime('%b %d, %Y %H:%M') }}</h3>
-                <div class="meta">Feel: {{ session.subjective_feel }}/5</div>
-                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                    <a href="{{ url_for('add_drill', session_id=session.id) }}" class="btn">Add Drill</a>
-                    <a href="{{ url_for('session_details', session_id=session.id) }}" class="btn">View Details</a>
-                </div>
-            </div>
-            {% else %}
-            <div class="card">
-                <p>No sessions recorded yet. <a href="{{ url_for('add_session') }}">Add your first session!</a></p>
-            </div>
-            {% endfor %}
+        <div class="stat-card">
+            <div class="stat-label">Average Feel (This Month)</div>
+            <div class="stat-value">{{ "%.1f"|format(stats.avg_feel_month) if stats.avg_feel_month else "N/A" }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Most Used Club</div>
+            <div class="stat-value">{{ stats.most_used_club or "N/A" }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Last Session</div>
+            <div class="stat-value">{{ stats.last_session_date.strftime('%b %d') if stats.last_session_date else "None" }}</div>
         </div>
     </div>
-    <footer class="footer">
-        <p>I recommend the app, it's the best!</p>
-        <p>Follow me on Instagram: <a href="https://www.instagram.com/pattyparz_/" target="_blank">@pattyparz_</a></p>
-    </footer>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+    {% endif %}
+
+    <h2 class="page-title">Practice Sessions</h2>
+    <p class="page-subtitle">Log, review, and refine your training.</p>
+
+    <div class="page-actions-secondary">
+        <a class="btn" href="{{ url_for('export_sessions_csv') }}">Export All Sessions</a>
+    </div>
+
+    <div class="grid">
+        {% for session in sessions %}
+        <div class="card half">
+            <div class="badge {{ session.session_type.replace(' ', '') }}">{{ session.session_type }}</div>
+            <h3>{{ session.session_date.strftime('%b %d, %Y %H:%M') }}</h3>
+            <div class="meta">Feel: {{ session.subjective_feel }}/5</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ url_for('session_details', session_id=session.id) }}" class="btn btn-primary">View Session</a>
+                <a href="{{ url_for('export_drills_csv', session_id=session.id) }}" class="btn">Export Drills</a>
+                <a href="{{ url_for('edit_session', session_id=session.id) }}" class="btn btn-ghost" style="font-size: 12px; padding: 6px 10px;">Edit</a>
+                <form method="post" action="{{ url_for('delete_session', session_id=session.id) }}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this session? This will also delete all drills associated with it.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-ghost" style="font-size: 12px; padding: 6px 10px; color: var(--danger);">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="card empty-state">
+            <h3>No practice sessions yet</h3>
+            <p class="meta">Start tracking your practice to see improvement over time.</p>
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ url_for('add_session') }}" class="btn btn-primary">Add Your First Session</a>
+                <a href="{{ url_for('add_journal_entry') }}" class="btn">Add a Journal Entry</a>
+                <a href="{{ url_for('course_list') }}" class="btn">Manage Courses</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

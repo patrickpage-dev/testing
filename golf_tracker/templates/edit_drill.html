@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Drill - Golf Practice Tracker{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Edit Drill</h1>
+    {% if error %}
+    <p class="alert">{{ error }}</p>
+    {% endif %}
+    
+    <div class="card">
+        <div class="form-section">
+            <h3 class="form-section-title">Drill Details</h3>
+            <form method="post" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="field">
+                    <label for="drill_name">Drill Name:</label>
+                    <input type="text" id="drill_name" name="drill_name" value="{{ drill.drill_name }}" required>
+                    <small class="field-hint">e.g., "100-yard approach shots", "Putting ladder drill"</small>
+                </div>
+
+                <div class="field">
+                    <label for="club">Club:</label>
+                    <select id="club" name="club">
+                        <option value="">-- Select Club --</option>
+                        <option value="Driver" {% if drill.club == 'Driver' %}selected{% endif %}>Driver</option>
+                        <option value="Fairway Wood" {% if drill.club == 'Fairway Wood' %}selected{% endif %}>Fairway Wood</option>
+                        <option value="Hybrid" {% if drill.club == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+                        <option value="Long Iron (2-4)" {% if drill.club == 'Long Iron (2-4)' %}selected{% endif %}>Long Iron (2-4)</option>
+                        <option value="Mid Iron (5-7)" {% if drill.club == 'Mid Iron (5-7)' %}selected{% endif %}>Mid Iron (5-7)</option>
+                        <option value="Short Iron (8-PW)" {% if drill.club == 'Short Iron (8-PW)' %}selected{% endif %}>Short Iron (8-PW)</option>
+                        <option value="Wedge (GW, SW, LW)" {% if drill.club == 'Wedge (GW, SW, LW)' %}selected{% endif %}>Wedge (GW, SW, LW)</option>
+                        <option value="Putter" {% if drill.club == 'Putter' %}selected{% endif %}>Putter</option>
+                        <option value="Other" {% if drill.club == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="target_distance">Target Distance (yards):</label>
+                    <input type="number" id="target_distance" name="target_distance" min="0" value="{{ drill.target_distance or '' }}">
+                    <small class="field-hint">Leave blank if not applicable</small>
+                </div>
+
+                <div class="field">
+                    <label for="balls_hit">Balls Hit:</label>
+                    <input type="number" id="balls_hit" name="balls_hit" min="1" value="{{ drill.balls_hit or '' }}">
+                    <small class="field-hint">Total number of balls hit for this drill</small>
+                </div>
+
+                <div class="field">
+                    <label for="success_metric">What does success look like for this drill?</label>
+                    <input type="text" id="success_metric" name="success_metric" value="{{ drill.success_metric or '' }}" placeholder="e.g., '80% within 10 feet', 'Consistent tempo'">
+                    <small class="field-hint">Describe how you measure success for this drill</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('session_details', session_id=drill.session_id) }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

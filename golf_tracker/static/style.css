@@ -358,6 +358,11 @@ body.dark-mode{
   padding: 18px;
 }
 
+body.dark-mode .card{
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border-color: var(--border);
+}
+
 @media (min-width: 860px){
   .card.half{ grid-column: span 6; }
   .card.third{ grid-column: span 4; }
@@ -452,8 +457,16 @@ input:focus, select:focus, textarea:focus{
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode textarea{
-  background: rgba(15, 23, 42, 0.85);
-  color: var(--text);
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border);
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus{
+  border-color: rgba(199,162,74,0.4);
+  box-shadow: 0 0 0 4px rgba(199,162,74,0.15);
 }
 
 body.dark-mode .header{
@@ -555,3 +568,193 @@ body.dark-mode .table th{
 
 a{ color: var(--green-2); }
 a:hover{ color: var(--green); }
+
+/* Quick Actions */
+.quick-actions{
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: rgba(11,61,46,0.06);
+  border: 1px solid rgba(11,61,46,0.12);
+}
+
+.page-actions-secondary{
+  margin: 18px 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Stats Grid */
+.stats-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 18px 0 30px;
+}
+
+.stat-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-label{
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.stat-value{
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: "Playfair Display", serif;
+}
+
+/* Empty States */
+.empty-state{
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state h3{
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.empty-state .meta{
+  margin-bottom: 0;
+}
+
+/* Form Sections */
+.form-section{
+  padding: 0;
+}
+
+.form-section-title{
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-family: "Playfair Display", serif;
+  color: var(--text);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field-hint{
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.form-actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Scoresheet Styling */
+.scoresheet-card{
+  padding: 24px;
+}
+
+.scoresheet-info{
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.scoresheet-info-item{
+  font-size: 14px;
+  color: var(--text);
+}
+
+.scoresheet-table{
+  font-size: 13px;
+}
+
+.scoresheet-header{
+  background: var(--surface-2) !important;
+  font-weight: 700;
+}
+
+body.dark-mode .scoresheet-header{
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.scoresheet-header th,
+.scoresheet-header td{
+  text-align: center;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  font-weight: 700;
+}
+
+.scoresheet-cell{
+  text-align: center;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+body.dark-mode .scoresheet-cell{
+  background: var(--surface);
+}
+
+.scoresheet-row{
+  border: 1px solid var(--border);
+}
+
+.scoresheet-row th{
+  background: var(--surface-2);
+  font-weight: 700;
+  text-align: left;
+  padding: 10px 12px;
+  border-right: 2px solid var(--border);
+}
+
+body.dark-mode .scoresheet-row th{
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.scoresheet-input-row td{
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+}
+
+.scoresheet-input{
+  width: 100%;
+  max-width: 60px;
+  text-align: center;
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+body.dark-mode .scoresheet-input{
+  background: var(--surface);
+  color: var(--text);
+}
+
+.scoresheet-input:focus{
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(11,61,46,0.15);
+  outline: none;
+}

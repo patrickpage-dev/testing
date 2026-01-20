@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Journal Entry - Golf Practice Tracker{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Edit Journal Entry</h1>
+    
+    <form method="post" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="card">
+            <div class="form-section">
+                <h3 class="form-section-title">Round Information</h3>
+                <div class="field">
+                    <label for="course_id">Golf Course:</label>
+                    <select id="course_id" name="course_id">
+                        <option value="">-- Select Course (Optional) --</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if entry.course_id == course.id %}selected{% endif %}>{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="field-hint">Select a course to enable scorecard tracking</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+            <div class="form-section">
+                <h3 class="form-section-title">Notes & Reflection</h3>
+                <div class="field">
+                    <label for="notes_before_round">Notes Before Round:</label>
+                    <textarea id="notes_before_round" name="notes_before_round" rows="4" placeholder="How are you feeling? What's your game plan?">{{ entry.notes_before_round or '' }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="notes_after_round">Notes After Round:</label>
+                    <textarea id="notes_after_round" name="notes_after_round" rows="4" placeholder="What went well? What needs work?">{{ entry.notes_after_round or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+            <div class="form-section">
+                <h3 class="form-section-title">Conditions & State</h3>
+                <div class="field">
+                    <label for="mental_state">Mental State:</label>
+                    <select id="mental_state" name="mental_state">
+                        <option value="">-- Select State --</option>
+                        <option value="Calm & Focused" {% if entry.mental_state == 'Calm & Focused' %}selected{% endif %}>Calm & Focused</option>
+                        <option value="Confident" {% if entry.mental_state == 'Confident' %}selected{% endif %}>Confident</option>
+                        <option value="Anxious" {% if entry.mental_state == 'Anxious' %}selected{% endif %}>Anxious</option>
+                        <option value="Frustrated" {% if entry.mental_state == 'Frustrated' %}selected{% endif %}>Frustrated</option>
+                        <option value="Distracted" {% if entry.mental_state == 'Distracted' %}selected{% endif %}>Distracted</option>
+                        <option value="Motivated" {% if entry.mental_state == 'Motivated' %}selected{% endif %}>Motivated</option>
+                        <option value="Other" {% if entry.mental_state == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="physical_state">Physical State:</label>
+                    <select id="physical_state" name="physical_state">
+                        <option value="">-- Select State --</option>
+                        <option value="Rested" {% if entry.physical_state == 'Rested' %}selected{% endif %}>Rested</option>
+                        <option value="Tired" {% if entry.physical_state == 'Tired' %}selected{% endif %}>Tired</option>
+                        <option value="Energized" {% if entry.physical_state == 'Energized' %}selected{% endif %}>Energized</option>
+                        <option value="Minor Ache/Pain" {% if entry.physical_state == 'Minor Ache/Pain' %}selected{% endif %}>Minor Ache/Pain</option>
+                        <option value="Injured" {% if entry.physical_state == 'Injured' %}selected{% endif %}>Injured</option>
+                        <option value="Other" {% if entry.physical_state == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="weather">Weather:</label>
+                    <input type="text" id="weather" name="weather" placeholder="e.g., Sunny, 75°F, Light Wind" value="{{ entry.weather or '' }}">
+                    <small class="field-hint">Describe the weather conditions</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('journal_details', entry_id=entry.id) }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

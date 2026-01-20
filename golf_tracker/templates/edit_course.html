@@ -1,70 +1,51 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Edit Course</title>
-</head>
-<body>
-    <div class="container">
-        <header class="site-header">
-            <div class="brand">
-                <h1>Golf Practice Tracker</h1>
-                <div class="tagline">Improvement happens here</div>
-                <div class="auth-meta">Signed in as {{ current_user.username }}</div>
-            </div>
-            <div class="site-nav">
-                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
-                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
-                <form method="post" action="{{ url_for('logout') }}" class="inline-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-ghost">Log Out</button>
-                </form>
-            </div>
-        </header>
+{% extends "base.html" %}
 
-        <h1 class="page-title">Edit {{ course.name }}</h1>
-        {% if error %}
-        <p class="alert">{{ error }}</p>
-        {% endif %}
-        <form method="post" class="form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="field">
-                <label for="name">Course Name:</label>
-                <input type="text" id="name" name="name" value="{{ course.name }}" required>
-            </div>
+{% block title %}Edit Course - Golf Practice Tracker{% endblock %}
 
-            <div class="field">
-                <label for="par">Par:</label>
-                <input type="number" id="par" name="par" min="1" value="{{ course.par }}" required>
-            </div>
+{% block content %}
+    <h1 class="page-title">Edit {{ course.name }}</h1>
+    {% if error %}
+    <p class="alert">{{ error }}</p>
+    {% endif %}
+    
+    <div class="card">
+        <div class="form-section">
+            <h3 class="form-section-title">Course Information</h3>
+            <form method="post" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="name">Course Name:</label>
+                    <input type="text" id="name" name="name" value="{{ course.name }}" required>
+                </div>
 
-            <div class="field">
-                <label for="course_rating">Course Rating:</label>
-                <input type="number" id="course_rating" name="course_rating" step="0.1" value="{{ course.course_rating }}" required>
-            </div>
+                <div class="field">
+                    <label for="par">Par:</label>
+                    <input type="number" id="par" name="par" min="1" value="{{ course.par }}" required>
+                </div>
 
-            <div class="field">
-                <label for="slope">Slope:</label>
-                <input type="number" id="slope" name="slope" min="55" max="155" value="{{ course.slope }}" required>
-            </div>
+                <div class="field">
+                    <label for="course_rating">Course Rating:</label>
+                    <input type="number" id="course_rating" name="course_rating" step="0.1" value="{{ course.course_rating }}" required>
+                    <small class="field-hint">USGA course rating (typically 67-77)</small>
+                </div>
 
-            <div class="field">
-                <label for="website_url">Course Website URL:</label>
-                <input type="url" id="website_url" name="website_url" placeholder="https://example.com" value="{{ course.website_url or '' }}">
-            </div>
+                <div class="field">
+                    <label for="slope">Slope:</label>
+                    <input type="number" id="slope" name="slope" min="55" max="155" value="{{ course.slope }}" required>
+                    <small class="field-hint">USGA slope rating (55-155)</small>
+                </div>
 
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-        <p style="margin-top: 20px;">
-            <a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a>
-        </p>
+                <div class="field">
+                    <label for="website_url">Course Website URL:</label>
+                    <input type="url" id="website_url" name="website_url" placeholder="https://example.com" value="{{ course.website_url or '' }}">
+                    <small class="field-hint">Optional: Link to course website</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('course_list') }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% endblock %}

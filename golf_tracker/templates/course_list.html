@@ -1,72 +1,49 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Golf Courses</title>
-</head>
-<body>
-    <div class="container">
-        <header class="site-header">
-            <div class="brand">
-                <h1>Golf Practice Tracker</h1>
-                <div class="tagline">Improvement happens here</div>
-                <div class="auth-meta">Signed in as {{ current_user.username }}</div>
-            </div>
-            <div class="site-nav">
-                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
-                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
-                <form method="post" action="{{ url_for('logout') }}" class="inline-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-ghost">Log Out</button>
-                </form>
-            </div>
-        </header>
+{% extends "base.html" %}
 
-        <h1 class="page-title">Golf Courses</h1>
-        <p class="page-subtitle">Add and manage your favorite golf courses.</p>
-        {% if current_user.is_authenticated and current_user.is_admin %}
-        <div style="margin-bottom: 20px;">
-            <a href="{{ url_for('add_course') }}" class="btn btn-primary">+ Add New Course</a>
-        </div>
-        {% endif %}
-        <div class="grid">
-            {% for course in courses %}
-            <div class="card third">
-                {% if course.website_url %}
-                    <a class="course-link-card" href="{{ course.website_url }}" target="_blank" rel="noopener">
-                        {{ course.name }}
-                    </a>
-                {% else %}
-                    <div class="course-link-card course-link-disabled">
-                        {{ course.name }}
-                        <div class="meta">Add website URL to enable link</div>
-                    </div>
-                {% endif %}
-                <div class="meta">Par: {{ course.par }}</div>
-                <div class="meta">Course Rating: {{ course.course_rating }}</div>
-                <div class="meta">Slope: {{ course.slope }}</div>
-                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    {% if current_user.is_authenticated and current_user.is_admin %}
-                        <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="btn">New Round</a>
-                        <a href="{{ url_for('edit_course', course_id=course.id) }}" class="btn btn-ghost">Edit</a>
-                    {% endif %}
-                    <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn">History</a>
-                </div>
-            </div>
+{% block title %}Golf Courses - Golf Practice Tracker{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Golf Courses</h1>
+    <p class="page-subtitle">Add and manage your favorite golf courses.</p>
+    
+    <div class="grid">
+        {% for course in courses %}
+        <div class="card third">
+            {% if course.website_url %}
+                <a class="course-link-card" href="{{ course.website_url }}" target="_blank" rel="noopener">
+                    {{ course.name }}
+                </a>
             {% else %}
-            <div class="card">
-                <p>No courses added yet. <a href="{{ url_for('add_course') }}">Add your first course!</a></p>
+                <div class="course-link-card course-link-disabled">
+                    {{ course.name }}
+                    <div class="meta">Add website URL to enable link</div>
+                </div>
+            {% endif %}
+            <div class="meta">Par: {{ course.par }}</div>
+            <div class="meta">Course Rating: {{ course.course_rating }}</div>
+            <div class="meta">Slope: {{ course.slope }}</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="btn">New Round</a>
+                    <a href="{{ url_for('edit_course', course_id=course.id) }}" class="btn btn-ghost">Edit</a>
+                {% endif %}
+                <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn">History</a>
             </div>
-            {% endfor %}
         </div>
-        <p style="margin-top: 20px;"><a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Back to Practice Sessions</a></p>
+        {% else %}
+        <div class="card empty-state">
+            <h3>No courses added yet</h3>
+            <p class="meta">Add courses to track your rounds and compare scorecards over time.</p>
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('add_course') }}" class="btn btn-primary">Add Your First Course</a>
+                {% else %}
+                <p class="meta">Contact an administrator to add courses.</p>
+                {% endif %}
+                <a href="{{ url_for('add_session') }}" class="btn">Add a Practice Session</a>
+                <a href="{{ url_for('add_journal_entry') }}" class="btn">Add a Journal Entry</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% endblock %}

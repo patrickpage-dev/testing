@@ -31,31 +31,62 @@ document.addEventListener('DOMContentLoaded', () => {
         const outTotal = table.querySelector('[data-total-for="current-out"]');
         const inTotal = table.querySelector('[data-total-for="current-in"]');
         const total = table.querySelector('[data-total-for="current-total"]');
+        const toPar = table.querySelector('[data-total-for="current-to-par"]');
+        
+        // Get par totals for +/- calculation
+        const parOut = table.querySelector('[data-par-total="out"]');
+        const parIn = table.querySelector('[data-par-total="in"]');
+        const parTotal = table.querySelector('[data-par-total="total"]');
 
-        if (!currentInputs.length || !outTotal || !inTotal || !total) {
+        if (!currentInputs.length) {
             return;
         }
 
         const updateTotals = () => {
             let outSum = 0;
             let inSum = 0;
+            let outParSum = 0;
+            let inParSum = 0;
 
             currentInputs.forEach((input) => {
                 const holeNumber = Number.parseInt(input.dataset.holeNumber, 10);
                 const value = Number.parseInt(input.value, 10);
+                const par = Number.parseInt(input.dataset.par, 10);
+                
                 if (!Number.isFinite(holeNumber) || !Number.isFinite(value)) {
                     return;
                 }
+                
                 if (holeNumber <= 9) {
                     outSum += value;
+                    if (Number.isFinite(par)) {
+                        outParSum += par;
+                    }
                 } else {
                     inSum += value;
+                    if (Number.isFinite(par)) {
+                        inParSum += par;
+                    }
                 }
             });
 
-            outTotal.textContent = outSum.toString();
-            inTotal.textContent = inSum.toString();
-            total.textContent = (outSum + inSum).toString();
+            const totalSum = outSum + inSum;
+            const totalPar = outParSum + inParSum;
+            const toParValue = totalSum - totalPar;
+
+            if (outTotal) outTotal.textContent = outSum.toString();
+            if (inTotal) inTotal.textContent = inSum.toString();
+            if (total) total.textContent = totalSum.toString();
+            
+            if (toPar) {
+                if (toParValue === 0) {
+                    toPar.textContent = 'E';
+                } else if (toParValue > 0) {
+                    toPar.textContent = '+' + toParValue.toString();
+                } else {
+                    toPar.textContent = toParValue.toString();
+                }
+            }
         };
 
         currentInputs.forEach((input) => {

@@ -171,6 +171,8 @@ def migrate_db_command():
 
 @app.route('/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     return render_template('landing.html')
 
 @app.route('/app')
@@ -184,7 +186,44 @@ def dashboard():
         ' ORDER BY session_date DESC',
         (current_user.id,)
     ).fetchall()
-    return render_template('index.html', sessions=sessions)
+    
+    # Calculate stats for dashboard
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+    
+    sessions_this_week = db.execute(
+        'SELECT COUNT(*) AS count FROM sessions WHERE user_id = ? AND session_date >= ?',
+        (current_user.id, week_ago)
+    ).fetchone()['count']
+    
+    avg_feel_month = db.execute(
+        'SELECT AVG(subjective_feel) AS avg FROM sessions WHERE user_id = ? AND session_date >= ?',
+        (current_user.id, month_ago)
+    ).fetchone()['avg']
+    
+    most_used_club = db.execute(
+        '''SELECT club, COUNT(*) AS count FROM drills d
+           JOIN sessions s ON d.session_id = s.id
+           WHERE s.user_id = ? AND d.club IS NOT NULL AND d.club != ''
+           GROUP BY club ORDER BY count DESC LIMIT 1''',
+        (current_user.id,)
+    ).fetchone()
+    
+    last_session = db.execute(
+        'SELECT session_date FROM sessions WHERE user_id = ? ORDER BY session_date DESC LIMIT 1',
+        (current_user.id,)
+    ).fetchone()
+    
+    stats = {
+        'sessions_this_week': sessions_this_week,
+        'avg_feel_month': avg_feel_month,
+        'most_used_club': most_used_club['club'] if most_used_club else None,
+        'last_session_date': last_session['session_date'] if last_session else None
+    }
+    
+    return render_template('index.html', sessions=sessions, stats=stats)
 
 @app.route('/login', methods=('GET', 'POST'))
 @limiter.limit('10 per minute')
@@ -277,6 +316,7 @@ def add_drill(session_id):
         target_distance = request.form.get('target_distance') or None
         balls_hit = request.form.get('balls_hit') or None
         success_metric = request.form['success_metric']
+        action = request.form.get('action', 'finish')  # 'add_another' or 'finish'
 
         try:
             if target_distance is not None:
@@ -292,7 +332,11 @@ def add_drill(session_id):
             (session_id, drill_name, club, target_distance, balls_hit, success_metric)
         )
         db.commit()
-        return redirect(url_for('dashboard'))
+        
+        if action == 'add_another':
+            return redirect(url_for('add_drill', session_id=session_id))
+        else:
+            return redirect(url_for('session_details', session_id=session_id))
     return render_template('add_drill.html', session_id=session_id, error=None)
 
 @app.route('/journal')
@@ -651,39 +695,48 @@ def add_holes_to_course(course_id):
         holes_to_insert = []
         for i in range(1, 19): # Assuming 18 holes
             par_key = f'hole_{i}_par'
+            distance_key = f'hole_{i}_distance'
             par_value = request.form.get(par_key)
+            distance_value = request.form.get(distance_key)
             if par_value:
                 try:
                     par_int = parse_int(par_value, f'Hole {i} par', 1, 7)
+                    distance_int = None
+                    if distance_value:
+                        distance_int = parse_int(distance_value, f'Hole {i} distance', 0)
                 except ValueError as exc:
                     existing_holes = db.execute(
-                        'SELECT hole_number, par FROM holes WHERE course_id = ? ORDER BY hole_number',
+                        'SELECT hole_number, par, distance FROM holes WHERE course_id = ? ORDER BY hole_number',
                         (course_id,)
                     ).fetchall()
-                    holes_data = {hole['hole_number']: hole['par'] for hole in existing_holes}
-                    holes_for_template = [{'hole_number': n, 'par': holes_data.get(n, 4)} for n in range(1, 19)]
+                    holes_data = {hole['hole_number']: {'par': hole['par'], 'distance': hole['distance']} for hole in existing_holes}
+                    holes_for_template = [{'hole_number': n, 'par': holes_data.get(n, {}).get('par', 4), 'distance': holes_data.get(n, {}).get('distance')} for n in range(1, 19)]
                     return render_template('add_holes_to_course.html', course=course, holes=holes_for_template, error=str(exc))
 
-                holes_to_insert.append((course_id, i, par_int))
+                holes_to_insert.append((course_id, i, par_int, distance_int))
 
         # Delete existing holes for this course first to allow re-defining
         db.execute('DELETE FROM holes WHERE course_id = ?', (course_id,))
         if holes_to_insert:
             db.executemany(
-                'INSERT INTO holes (course_id, hole_number, par) VALUES (?, ?, ?)',
+                'INSERT INTO holes (course_id, hole_number, par, distance) VALUES (?, ?, ?, ?)',
                 holes_to_insert
             )
         db.commit()
         return redirect(url_for('course_list')) # Redirect back to course list
 
     # GET request: Prepare an empty form for 18 holes or show existing pars
-    existing_holes = db.execute('SELECT hole_number, par FROM holes WHERE course_id = ? ORDER BY hole_number', (course_id,)).fetchall()
-    holes_data = {hole['hole_number']: hole['par'] for hole in existing_holes}
+    existing_holes = db.execute('SELECT hole_number, par, distance FROM holes WHERE course_id = ? ORDER BY hole_number', (course_id,)).fetchall()
+    holes_data = {hole['hole_number']: {'par': hole['par'], 'distance': hole['distance']} for hole in existing_holes}
 
     # Create a list of 18 holes with default par 4, or existing par
     holes_for_template = []
     for i in range(1, 19):
-        holes_for_template.append({'hole_number': i, 'par': holes_data.get(i, 4)})
+        holes_for_template.append({
+            'hole_number': i,
+            'par': holes_data.get(i, {}).get('par', 4),
+            'distance': holes_data.get(i, {}).get('distance')
+        })
 
     return render_template('add_holes_to_course.html', course=course, holes=holes_for_template, error=None)
 
@@ -692,7 +745,7 @@ def add_holes_to_course(course_id):
 def add_scorecard(journal_entry_id):
     db = get_db()
     journal_entry = db.execute(
-        'SELECT je.id, je.course_id, c.name AS course_name '
+        'SELECT je.id, je.course_id, je.entry_date, c.name AS course_name '
         'FROM journal_entries je JOIN courses c ON je.course_id = c.id '
         'WHERE je.id = ? AND je.user_id = ?',
         (journal_entry_id, current_user.id)
@@ -705,7 +758,7 @@ def add_scorecard(journal_entry_id):
     course_name = journal_entry['course_name']
 
     holes = db.execute(
-        'SELECT id, hole_number, par FROM holes WHERE course_id = ? ORDER BY hole_number',
+        'SELECT id, hole_number, par, distance FROM holes WHERE course_id = ? ORDER BY hole_number',
         (course_id,)
     ).fetchall()
 
@@ -899,6 +952,160 @@ def session_details(session_id):
         return "Session not found", 404
     
     return render_template('session_details.html', session=session, drills=drills)
+
+@app.route('/session/<int:session_id>/edit', methods=('GET', 'POST'))
+@login_required
+def edit_session(session_id):
+    db = get_db()
+    session = db.execute(
+        'SELECT id, session_type, session_date, subjective_feel FROM sessions WHERE id = ? AND user_id = ?',
+        (session_id, current_user.id)
+    ).fetchone()
+    
+    if session is None:
+        return "Session not found", 404
+    
+    if request.method == 'POST':
+        session_type = request.form['session_type']
+        try:
+            subjective_feel = parse_int(request.form['subjective_feel'], 'Subjective feel', 1, 5)
+        except ValueError as exc:
+            return render_template('edit_session.html', session=session, error=str(exc))
+        
+        db.execute(
+            'UPDATE sessions SET session_type = ?, subjective_feel = ? WHERE id = ? AND user_id = ?',
+            (session_type, subjective_feel, session_id, current_user.id)
+        )
+        db.commit()
+        return redirect(url_for('session_details', session_id=session_id))
+    
+    return render_template('edit_session.html', session=session, error=None)
+
+@app.post('/session/<int:session_id>/delete')
+@login_required
+def delete_session(session_id):
+    db = get_db()
+    session = db.execute(
+        'SELECT id FROM sessions WHERE id = ? AND user_id = ?',
+        (session_id, current_user.id)
+    ).fetchone()
+    
+    if session is None:
+        return "Session not found", 404
+    
+    # Delete drills first (cascade should handle this, but being explicit)
+    db.execute('DELETE FROM drills WHERE session_id = ?', (session_id,))
+    db.execute('DELETE FROM sessions WHERE id = ? AND user_id = ?', (session_id, current_user.id))
+    db.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/drill/<int:drill_id>/edit', methods=('GET', 'POST'))
+@login_required
+def edit_drill(drill_id):
+    db = get_db()
+    drill = db.execute(
+        '''SELECT d.id, d.session_id, d.drill_name, d.club, d.target_distance, d.balls_hit, d.success_metric
+           FROM drills d
+           JOIN sessions s ON d.session_id = s.id
+           WHERE d.id = ? AND s.user_id = ?''',
+        (drill_id, current_user.id)
+    ).fetchone()
+    
+    if drill is None:
+        return "Drill not found", 404
+    
+    if request.method == 'POST':
+        drill_name = request.form['drill_name']
+        club = request.form['club']
+        target_distance = request.form.get('target_distance') or None
+        balls_hit = request.form.get('balls_hit') or None
+        success_metric = request.form['success_metric']
+        
+        try:
+            if target_distance is not None:
+                target_distance = parse_int(target_distance, 'Target distance', 0)
+            if balls_hit is not None:
+                balls_hit = parse_int(balls_hit, 'Balls hit', 1)
+        except ValueError as exc:
+            return render_template('edit_drill.html', drill=drill, error=str(exc))
+        
+        db.execute(
+            'UPDATE drills SET drill_name = ?, club = ?, target_distance = ?, balls_hit = ?, success_metric = ? WHERE id = ?',
+            (drill_name, club, target_distance, balls_hit, success_metric, drill_id)
+        )
+        db.commit()
+        return redirect(url_for('session_details', session_id=drill['session_id']))
+    
+    return render_template('edit_drill.html', drill=drill, error=None)
+
+@app.post('/drill/<int:drill_id>/delete')
+@login_required
+def delete_drill(drill_id):
+    db = get_db()
+    drill = db.execute(
+        '''SELECT d.id, d.session_id
+           FROM drills d
+           JOIN sessions s ON d.session_id = s.id
+           WHERE d.id = ? AND s.user_id = ?''',
+        (drill_id, current_user.id)
+    ).fetchone()
+    
+    if drill is None:
+        return "Drill not found", 404
+    
+    session_id = drill['session_id']
+    db.execute('DELETE FROM drills WHERE id = ?', (drill_id,))
+    db.commit()
+    return redirect(url_for('session_details', session_id=session_id))
+
+@app.route('/journal/<int:entry_id>/edit', methods=('GET', 'POST'))
+@login_required
+def edit_journal_entry(entry_id):
+    db = get_db()
+    entry = db.execute(
+        'SELECT id, course_id, notes_before_round, notes_after_round, mental_state, physical_state, weather FROM journal_entries WHERE id = ? AND user_id = ?',
+        (entry_id, current_user.id)
+    ).fetchone()
+    
+    if entry is None:
+        return "Journal entry not found", 404
+    
+    courses = db.execute('SELECT id, name FROM courses ORDER BY name').fetchall()
+    
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        notes_before_round = request.form['notes_before_round']
+        notes_after_round = request.form['notes_after_round']
+        mental_state = request.form['mental_state']
+        physical_state = request.form['physical_state']
+        weather = request.form['weather']
+        
+        db.execute(
+            'UPDATE journal_entries SET course_id = ?, notes_before_round = ?, notes_after_round = ?, mental_state = ?, physical_state = ?, weather = ? WHERE id = ? AND user_id = ?',
+            (course_id if course_id else None, notes_before_round, notes_after_round, mental_state, physical_state, weather, entry_id, current_user.id)
+        )
+        db.commit()
+        return redirect(url_for('journal_details', entry_id=entry_id))
+    
+    return render_template('edit_journal_entry.html', entry=entry, courses=courses, error=None)
+
+@app.post('/journal/<int:entry_id>/delete')
+@login_required
+def delete_journal_entry(entry_id):
+    db = get_db()
+    entry = db.execute(
+        'SELECT id FROM journal_entries WHERE id = ? AND user_id = ?',
+        (entry_id, current_user.id)
+    ).fetchone()
+    
+    if entry is None:
+        return "Journal entry not found", 404
+    
+    # Delete scores first
+    db.execute('DELETE FROM scores WHERE journal_entry_id = ?', (entry_id,))
+    db.execute('DELETE FROM journal_entries WHERE id = ? AND user_id = ?', (entry_id, current_user.id))
+    db.commit()
+    return redirect(url_for('journal_list'))
 
 if __name__ == '__main__':
     debug_enabled = os.environ.get('FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
