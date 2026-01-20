@@ -4,27 +4,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Add Course</title>
 </head>
 <body>
     <div class="container">
-        <h1>Add New Golf Course</h1>
-        <form method="post">
-            <label for="name">Course Name:</label>
-            <input type="text" id="name" name="name" required>
+        <h1 class="page-title">Add New Golf Course</h1>
+        <form method="post" class="form">
+            <div class="field">
+                <label for="name">Course Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
 
-            <label for="par">Par:</label>
-            <input type="number" id="par" name="par" min="1" required>
+            <div class="field">
+                <label for="par">Par:</label>
+                <input type="number" id="par" name="par" min="1" required>
+            </div>
 
-            <label for="course_rating">Course Rating:</label>
-            <input type="number" id="course_rating" name="course_rating" step="0.1" required>
+            <div class="field">
+                <label for="course_rating">Course Rating:</label>
+                <input type="number" id="course_rating" name="course_rating" step="0.1" required>
+            </div>
 
-            <label for="slope">Slope:</label>
-            <input type="number" id="slope" name="slope" min="55" max="155" required>
+            <div class="field">
+                <label for="slope">Slope:</label>
+                <input type="number" id="slope" name="slope" min="55" max="155" required>
+            </div>
 
-            <button type="submit" class="button">Add Course</button>
+            <button type="submit" class="btn btn-primary">Add Course</button>
         </form>
-        <p><a href="{{ url_for('course_list') }}">Back to Course List</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a></p>
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

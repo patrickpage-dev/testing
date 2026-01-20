@@ -4,41 +4,54 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Add Drill</title>
 </head>
 <body>
     <div class="container">
-        <h1>Add New Drill to Session {{ session_id }}</h1>
-        <form method="post">
-            <label for="drill_name">Drill Name:</label>
-            <input type="text" id="drill_name" name="drill_name" required>
+        <h1 class="page-title">Add New Drill to Session {{ session_id }}</h1>
+        <form method="post" class="form">
+            <div class="field">
+                <label for="drill_name">Drill Name:</label>
+                <input type="text" id="drill_name" name="drill_name" required>
+            </div>
 
-            <label for="club">Club:</label>
-            <select id="club" name="club">
-                <option value="">-- Select Club --</option>
-                <option value="Driver">Driver</option>
-                <option value="Fairway Wood">Fairway Wood</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="Long Iron (2-4)">Long Iron (2-4)</option>
-                <option value="Mid Iron (5-7)">Mid Iron (5-7)</option>
-                <option value="Short Iron (8-PW)">Short Iron (8-PW)</option>
-                <option value="Wedge (GW, SW, LW)">Wedge (GW, SW, LW)</option>
-                <option value="Putter">Putter</option>
-                <option value="Other">Other</option>
-            </select>
+            <div class="field">
+                <label for="club">Club:</label>
+                <select id="club" name="club">
+                    <option value="">-- Select Club --</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Fairway Wood">Fairway Wood</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Long Iron (2-4)">Long Iron (2-4)</option>
+                    <option value="Mid Iron (5-7)">Mid Iron (5-7)</option>
+                    <option value="Short Iron (8-PW)">Short Iron (8-PW)</option>
+                    <option value="Wedge (GW, SW, LW)">Wedge (GW, SW, LW)</option>
+                    <option value="Putter">Putter</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-            <label for="target_distance">Target Distance (yards):</label>
-            <input type="number" id="target_distance" name="target_distance">
+            <div class="field">
+                <label for="target_distance">Target Distance (yards):</label>
+                <input type="number" id="target_distance" name="target_distance">
+            </div>
 
-            <label for="balls_hit">Balls Hit:</label>
-            <input type="number" id="balls_hit" name="balls_hit">
+            <div class="field">
+                <label for="balls_hit">Balls Hit:</label>
+                <input type="number" id="balls_hit" name="balls_hit">
+            </div>
 
-            <label for="success_metric">Success Metric:</label>
-            <input type="text" id="success_metric" name="success_metric">
+            <div class="field">
+                <label for="success_metric">Success Metric:</label>
+                <input type="text" id="success_metric" name="success_metric">
+            </div>
 
-            <button type="submit" class="button">Add Drill</button>
+            <button type="submit" class="btn btn-primary">Add Drill</button>
         </form>
-        <p><a href="{{ url_for('index') }}">Back to Sessions</a></p>
+        <p><a href="{{ url_for('index') }}" class="btn btn-ghost">Back to Sessions</a></p>
     </div>
 </body>
 </html>

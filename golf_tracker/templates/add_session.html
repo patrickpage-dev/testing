@@ -4,25 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Add Session</title>
 </head>
 <body>
     <div class="container">
-        <h1>Add New Practice Session</h1>
-        <form method="post">
-            <label for="session_type">Session Type:</label>
-            <select id="session_type" name="session_type" required>
-                <option value="range">Range</option>
-                <option value="putting">Putting</option>
-                <option value="short game">Short Game</option>
-            </select>
+        <h1 class="page-title">Add New Practice Session</h1>
+        <form method="post" class="form">
+            <div class="field">
+                <label for="session_type">Session Type:</label>
+                <select id="session_type" name="session_type" required>
+                    <option value="range">Range</option>
+                    <option value="putting">Putting</option>
+                    <option value="short game">Short Game</option>
+                </select>
+            </div>
 
-            <label for="subjective_feel">Subjective Feel (1-5):</label>
-            <input type="number" id="subjective_feel" name="subjective_feel" min="1" max="5" required>
+            <div class="field">
+                <label for="subjective_feel">Subjective Feel (1-5):</label>
+                <input type="number" id="subjective_feel" name="subjective_feel" min="1" max="5" required>
+            </div>
 
-            <button type="submit" class="button">Add Session</button>
+            <button type="submit" class="btn btn-primary">Add Session</button>
         </form>
-        <p><a href="{{ url_for('index') }}">Back to Sessions</a></p>
+        <p><a href="{{ url_for('index') }}" class="btn btn-ghost">Back to Sessions</a></p>
     </div>
 </body>
 </html>

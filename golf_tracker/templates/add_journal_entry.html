@@ -4,58 +4,71 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Add Journal Entry</title>
 </head>
 <body>
     <div class="container">
-        <h1>Add New Journal Entry</h1>
-        <form method="post">
-            <label for="round_stats">Round Stats (e.g., Score, Putts, Fairways Hit, GIR):</label>
-            <textarea id="round_stats" name="round_stats" rows="4"></textarea>
+        <h1 class="page-title">Add New Journal Entry</h1>
+        <form method="post" class="form">
+            <div class="field">
+                <label for="course_id">Golf Course:</label>
+                <select id="course_id" name="course_id">
+                    <option value="">-- Select Course (Optional) --</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <label for="course_id">Golf Course:</label>
-            <select id="course_id" name="course_id">
-                <option value="">-- Select Course (Optional) --</option>
-                {% for course in courses %}
-                <option value="{{ course.id }}">{{ course.name }}</option>
-                {% endfor %}
-            </select>
+            <div class="field">
+                <label for="notes_before_round">Notes Before Round:</label>
+                <textarea id="notes_before_round" name="notes_before_round" rows="4"></textarea>
+            </div>
 
-            <label for="notes_before_round">Notes Before Round:</label>
-            <textarea id="notes_before_round" name="notes_before_round" rows="4"></textarea>
+            <div class="field">
+                <label for="notes_after_round">Notes After Round:</label>
+                <textarea id="notes_after_round" name="notes_after_round" rows="4"></textarea>
+            </div>
 
-            <label for="notes_after_round">Notes After Round:</label>
-            <textarea id="notes_after_round" name="notes_after_round" rows="4"></textarea>
+            <div class="field">
+                <label for="mental_state">Mental State:</label>
+                <select id="mental_state" name="mental_state">
+                    <option value="">-- Select State --</option>
+                    <option value="Calm & Focused">Calm & Focused</option>
+                    <option value="Confident">Confident</option>
+                    <option value="Anxious">Anxious</option>
+                    <option value="Frustrated">Frustrated</option>
+                    <option value="Distracted">Distracted</option>
+                    <option value="Motivated">Motivated</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-            <label for="mental_state">Mental State:</label>
-            <select id="mental_state" name="mental_state">
-                <option value="">-- Select State --</option>
-                <option value="Calm & Focused">Calm & Focused</option>
-                <option value="Confident">Confident</option>
-                <option value="Anxious">Anxious</option>
-                <option value="Frustrated">Frustrated</option>
-                <option value="Distracted">Distracted</option>
-                <option value="Motivated">Motivated</option>
-                <option value="Other">Other</option>
-            </select>
+            <div class="field">
+                <label for="physical_state">Physical State:</label>
+                <select id="physical_state" name="physical_state">
+                    <option value="">-- Select State --</option>
+                    <option value="Rested">Rested</option>
+                    <option value="Tired">Tired</option>
+                    <option value="Energized">Energized</option>
+                    <option value="Minor Ache/Pain">Minor Ache/Pain</option>
+                    <option value="Injured">Injured</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-            <label for="physical_state">Physical State:</label>
-            <select id="physical_state" name="physical_state">
-                <option value="">-- Select State --</option>
-                <option value="Rested">Rested</option>
-                <option value="Tired">Tired</option>
-                <option value="Energized">Energized</option>
-                <option value="Minor Ache/Pain">Minor Ache/Pain</option>
-                <option value="Injured">Injured</option>
-                <option value="Other">Other</option>
-            </select>
+            <div class="field">
+                <label for="weather">Weather:</label>
+                <input type="text" id="weather" name="weather" placeholder="e.g., Sunny, 75F, Light Wind">
+            </div>
 
-            <label for="weather">Weather:</label>
-            <input type="text" id="weather" name="weather" placeholder="e.g., Sunny, 75F, Light Wind">
-
-            <button type="submit" class="button">Add Journal Entry</button>
+            <button type="submit" class="btn btn-primary">Add Journal Entry</button>
         </form>
-        <p><a href="{{ url_for('journal_list') }}">Back to Journal Entries</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('journal_list') }}" class="btn btn-ghost">Back to Journal Entries</a></p>
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

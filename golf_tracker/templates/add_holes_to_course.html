@@ -4,20 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Define Holes for {{ course.name }}</title>
 </head>
 <body>
     <div class="container">
-        <h1>Define Holes for {{ course.name }}</h1>
-        <p>Enter the Par for each hole:</p>
-        <form method="post">
+        <h1 class="page-title">Define Holes for {{ course.name }}</h1>
+        <p class="page-subtitle">Enter the Par for each hole:</p>
+        <form method="post" class="form">
             {% for hole in holes %}
-            <label for="hole_{{ hole.hole_number }}_par">Hole {{ hole.hole_number }} Par:</label>
-            <input type="number" id="hole_{{ hole.hole_number }}_par" name="hole_{{ hole.hole_number }}_par" min="1" max="7" value="{{ hole.par }}" required>
+            <div class="field">
+                <label for="hole_{{ hole.hole_number }}_par">Hole {{ hole.hole_number }} Par:</label>
+                <input type="number" id="hole_{{ hole.hole_number }}_par" name="hole_{{ hole.hole_number }}_par" min="1" max="7" value="{{ hole.par }}" required>
+            </div>
             {% endfor %}
-            <button type="submit" class="button">Save Hole Pars</button>
+            <button type="submit" class="btn btn-primary">Save Hole Pars</button>
         </form>
-        <p><a href="{{ url_for('course_list') }}">Back to Course List</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a></p>
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

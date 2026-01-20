@@ -4,26 +4,38 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Golf Journal</title>
 </head>
 <body>
     <div class="container">
-        <h1>Golf Journal</h1>
-        <a href="{{ url_for('add_journal_entry') }}" class="button">Add New Journal Entry</a>
-        <a href="{{ url_for('export_journal_csv') }}" class="button export-button">Export Journal to CSV</a>
-        <div class="journal-list">
+        <h1 class="page-title">Golf Journal</h1>
+        <p class="page-subtitle">Structured data + reflection for elite players.</p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
+            <a href="{{ url_for('add_journal_entry') }}" class="btn btn-primary">+ New Entry</a>
+            <a href="{{ url_for('export_journal_csv') }}" class="btn">Export Journal to CSV</a>
+        </div>
+        
+        <div class="grid">
             {% for entry in entries %}
-            <div class="session-card">
-                <h2>Entry on {{ entry.entry_date.strftime('%Y-%m-%d %H:%M') }}{% if entry.course_name %} at {{ entry.course_name }}{% endif %}</h2>
-                <p>Mental State: {{ entry.mental_state if entry.mental_state else 'N/A' }}</p>
-                <p>Physical State: {{ entry.physical_state if entry.physical_state else 'N/A' }}</p>
-                <a href="{{ url_for('journal_details', entry_id=entry.id) }}" class="button">View Details</a>
+            <div class="card half">
+                <h3>Entry on {{ entry.entry_date.strftime('%b %d, %Y %H:%M') }}{% if entry.course_name %} at {{ entry.course_name }}{% endif %}</h3>
+                <div class="meta">Mental State: {{ entry.mental_state if entry.mental_state else 'N/A' }}</div>
+                <div class="meta">Physical State: {{ entry.physical_state if entry.physical_state else 'N/A' }}</div>
+                <div style="margin-top: 15px;">
+                    <a href="{{ url_for('journal_details', entry_id=entry.id) }}" class="btn">View Details</a>
+                </div>
             </div>
             {% else %}
-            <p>No journal entries recorded yet. <a href="{{ url_for('add_journal_entry') }}">Add your first entry!</a></p>
+            <div class="card">
+                <p>No journal entries recorded yet. <a href="{{ url_for('add_journal_entry') }}">Add your first entry!</a></p>
+            </div>
             {% endfor %}
         </div>
-        <p><a href="{{ url_for('index') }}">Back to Practice Sessions</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('index') }}" class="btn btn-ghost">Back to Practice Sessions</a></p>
     </div>
 </body>
 </html>

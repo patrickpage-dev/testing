@@ -4,36 +4,52 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Golf Tracker</title>
 </head>
 <body>
     <div class="container">
-        <h1>Golf Practice Sessions</h1>
-        <div class="main-nav-buttons">
-            <a href="{{ url_for('add_session') }}" class="button">Add New Session</a>
-            <a href="{{ url_for('journal_list') }}" class="button">Go to Golf Journal</a>
-            <a href="{{ url_for('course_list') }}" class="button">Manage Courses</a>
-            <a href="{{ url_for('export_sessions_csv') }}" class="button export-button">Export Sessions to CSV</a>
-            <button id="theme-toggle" class="button">Toggle Dark Mode</button>
-        </div>
-        <div class="sessions-list">
+        <header class="header">
+            <div class="brand">
+                <h1>Golf Practice Tracker</h1>
+                <div class="tagline">Improvement happens here</div>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn btn-primary" href="{{ url_for('add_session') }}">+ New Session</a>
+                <a class="btn" href="{{ url_for('journal_list') }}">Journal</a>
+                <a class="btn" href="{{ url_for('course_list') }}">Courses</a>
+                <a class="btn" href="{{ url_for('export_sessions_csv') }}">Export</a>
+                <button id="theme-toggle" class="btn btn-ghost">Toggle Dark Mode</button>
+            </div>
+        </header>
+
+        <h2 class="page-title">Practice Sessions</h2>
+        <p class="page-subtitle">Log, review, and refine your training.</p>
+
+        <div class="grid">
             {% for session in sessions %}
-            <div class="session-card">
-                <h2>{{ session.session_type }} - {{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</h2>
-                <p>Subjective Feel: {{ session.subjective_feel }}/5</p>
-                <a href="{{ url_for('add_drill', session_id=session.id) }}" class="button">Add Drill to Session</a>
-                <a href="{{ url_for('session_details', session_id=session.id) }}" class="button">View Details</a>
+            <div class="card half">
+                <div class="badge {{ session.session_type.replace(' ', '') }}">{{ session.session_type }}</div>
+                <h3>{{ session.session_date.strftime('%b %d, %Y %H:%M') }}</h3>
+                <div class="meta">Feel: {{ session.subjective_feel }}/5</div>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <a href="{{ url_for('add_drill', session_id=session.id) }}" class="btn">Add Drill</a>
+                    <a href="{{ url_for('session_details', session_id=session.id) }}" class="btn">View Details</a>
+                </div>
             </div>
             {% else %}
-            <p>No sessions recorded yet. <a href="{{ url_for('add_session') }}">Add your first session!</a></p>
+            <div class="card">
+                <p>No sessions recorded yet. <a href="{{ url_for('add_session') }}">Add your first session!</a></p>
+            </div>
             {% endfor %}
         </div>
-        </div>
-        <div class="personal-branding">
-            <p>I recommend the app, it's the best!</p>
-            <p>Follow me on Instagram: <a href="https://www.instagram.com/pattparz_/" target="_blank">@pattyparz_</a></p>
-        </div>
     </div>
+    <footer class="footer">
+        <p>I recommend the app, it's the best!</p>
+        <p>Follow me on Instagram: <a href="https://www.instagram.com/pattparz_/" target="_blank">@pattyparz_</a></p>
+    </footer>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

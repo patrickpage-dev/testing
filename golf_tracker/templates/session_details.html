@@ -4,35 +4,42 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <title>Session Details</title>
 </head>
 <body>
     <div class="container">
-        <h1>Session Details</h1>
-        <div class="session-card">
-            <h2>{{ session.session_type }} - {{ session.session_date.strftime('%Y-%m-%d %H:%M') }}</h2>
-            <p>Subjective Feel: {{ session.subjective_feel }}/5</p>
-            <a href="{{ url_for('add_drill', session_id=session.id) }}" class="button">Add Another Drill to this Session</a>
-            <a href="{{ url_for('export_drills_csv', session_id=session.id) }}" class="button export-button">Export Drills to CSV</a>
+        <h1 class="page-title">Session Details</h1>
+        <div class="card">
+            <h3>{{ session.session_type }} - {{ session.session_date.strftime('%b %d, %Y %H:%M') }}</h3>
+            <div class="meta">Subjective Feel: {{ session.subjective_feel }}/5</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <a href="{{ url_for('add_drill', session_id=session.id) }}" class="btn btn-primary">Add Another Drill</a>
+                <a href="{{ url_for('export_drills_csv', session_id=session.id) }}" class="btn">Export Drills to CSV</a>
+            </div>
         </div>
 
-        <h2>Drills for this Session</h2>
-        <div class="drills-list">
+        <h2 class="page-title">Drills for this Session</h2>
+        <div class="grid">
             {% if drills %}
                 {% for drill in drills %}
-                <div class="drill-card">
+                <div class="card third">
                     <h3>{{ drill.drill_name }}</h3>
-                    <p>Club: {{ drill.club if drill.club else 'N/A' }}</p>
-                    <p>Target Distance: {{ drill.target_distance if drill.target_distance else 'N/A' }}</p>
-                    <p>Balls Hit: {{ drill.balls_hit if drill.balls_hit else 'N/A' }}</p>
-                    <p>Success Metric: {{ drill.success_metric if drill.success_metric else 'N/A' }}</p>
+                    <div class="meta">Club: {{ drill.club if drill.club else 'N/A' }}</div>
+                    <div class="meta">Target Distance: {{ drill.target_distance if drill.target_distance else 'N/A' }}</div>
+                    <div class="meta">Balls Hit: {{ drill.balls_hit if drill.balls_hit else 'N/A' }}</div>
+                    <div class="meta">Success Metric: {{ drill.success_metric if drill.success_metric else 'N/A' }}</div>
                 </div>
                 {% endfor %}
             {% else %}
+            <div class="card">
                 <p>No drills recorded for this session yet.</p>
+            </div>
             {% endif %}
         </div>
-        <p><a href="{{ url_for('index') }}">Back to All Sessions</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('index') }}" class="btn btn-ghost">Back to All Sessions</a></p>
     </div>
 </body>
 </html>
