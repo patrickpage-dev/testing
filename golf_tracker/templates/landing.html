@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
+        <header class="header landing-header">
             <div class="brand">
                 <h1>Golf Practice Tracker</h1>
                 <div class="tagline">Improvement happens here</div>
@@ -22,20 +22,71 @@
             </div>
         </header>
 
-        <div class="card" style="margin-top: 26px;">
-            <h2 class="page-title" style="font-size: 28px; margin-top: 0;">Track practice with purpose</h2>
-            <p class="page-subtitle">Log sessions, keep a golf journal, and compare rounds with a clean scorecard view.</p>
-            <div class="grid">
-                <div class="card half">
-                    <h3>Practice sessions</h3>
-                    <div class="meta">Range, putting, short game — log drills and how the session felt.</div>
-                </div>
-                <div class="card half">
-                    <h3>Scorecards & journal</h3>
-                    <div class="meta">Tie rounds to courses, track hole-by-hole scores, and record notes.</div>
+        <section class="landing-hero">
+            <div class="landing-hero-content">
+                <div class="landing-eyebrow">Golf Practice Tracker</div>
+                <h2>Build a smarter practice routine</h2>
+                <p>Track range sessions, journal rounds, and compare scorecards with a clean, modern workflow.</p>
+                <div class="landing-cta">
+                    <a class="btn btn-primary" href="{{ url_for('register') }}">Get Started</a>
+                    <a class="btn btn-ghost" href="{{ url_for('login') }}">Sign In</a>
                 </div>
             </div>
-        </div>
+            <div class="landing-hero-card">
+                <div class="landing-stat">
+                    <span>Sessions Logged</span>
+                    <strong>128</strong>
+                </div>
+                <div class="landing-stat">
+                    <span>Best Round</span>
+                    <strong>72</strong>
+                </div>
+                <div class="landing-stat">
+                    <span>Practice Focus</span>
+                    <strong>Short Game</strong>
+                </div>
+                <div class="landing-divider"></div>
+                <div class="landing-mini-card">
+                    <div>
+                        <strong>New Round</strong>
+                        <span>Track hole-by-hole scores</span>
+                    </div>
+                    <button class="btn btn-primary" type="button">+ Add</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-products">
+            <div class="landing-section-title">
+                <h3>Everything you need to improve</h3>
+                <p class="meta">Structured practice, meaningful notes, and easy exports.</p>
+            </div>
+            <div class="grid landing-cards">
+                <div class="card third landing-card">
+                    <div class="landing-card-badge">Practice</div>
+                    <h4>Session tracking</h4>
+                    <p class="meta">Log range, putting, and short game sessions with a quick drill flow.</p>
+                </div>
+                <div class="card third landing-card">
+                    <div class="landing-card-badge">Journal</div>
+                    <h4>Round insights</h4>
+                    <p class="meta">Capture mental and physical notes plus weather conditions for every round.</p>
+                </div>
+                <div class="card third landing-card">
+                    <div class="landing-card-badge">Scorecards</div>
+                    <h4>Side-by-side history</h4>
+                    <p class="meta">Compare recent rounds, averages, and best scores at a glance.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-footer">
+            <div>
+                <h3>Ready to get better?</h3>
+                <p class="meta">Create your account and start tracking today.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ url_for('register') }}">Create Account</a>
+        </section>
     </div>
 </body>
 </html>

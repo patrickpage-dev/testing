@@ -39,6 +39,7 @@ def get_db():
             detect_types=sqlite3.PARSE_DECLTYPES
         )
         g.db.row_factory = sqlite3.Row
+        g.db.execute('PRAGMA foreign_keys = ON')
     return g.db
 
 class User(UserMixin):
@@ -158,10 +159,15 @@ def migrate_db_command():
         migration_id = getattr(module, 'MIGRATION_ID', path.stem)
         if migration_id in applied:
             continue
-        module.upgrade(db)
-        db.execute('INSERT INTO schema_migrations (id) VALUES (?)', (migration_id,))
-        db.commit()
-        print(f'Applied migration {migration_id}')
+        try:
+            db.execute('BEGIN')
+            module.upgrade(db)
+            db.execute('INSERT INTO schema_migrations (id) VALUES (?)', (migration_id,))
+            db.commit()
+            print(f'Applied migration {migration_id}')
+        except Exception:
+            db.rollback()
+            raise
 
 @app.route('/')
 def index():
@@ -227,7 +233,8 @@ def register():
 
     return render_template('register.html', error=None)
 
-@app.route('/logout')
+@app.post('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))

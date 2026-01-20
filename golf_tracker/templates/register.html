@@ -11,6 +11,17 @@
 </head>
 <body>
     <div class="container">
+        <header class="site-header">
+            <div class="brand">
+                <h1>Golf Practice Tracker</h1>
+                <div class="tagline">Improvement happens here</div>
+            </div>
+            <div class="site-nav">
+                <a class="btn btn-ghost" href="{{ url_for('index') }}">Home</a>
+                <a class="btn btn-ghost" href="{{ url_for('login') }}">Log In</a>
+            </div>
+        </header>
+
         <h1 class="page-title">Create Account</h1>
         <p class="page-subtitle">Sign up to track your own rounds.</p>
         <form method="post" class="form">

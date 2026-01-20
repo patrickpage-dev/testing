@@ -1,28 +1,18 @@
+DROP TABLE IF EXISTS scores;
 DROP TABLE IF EXISTS drills;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS journal_entries;
-DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS holes;
-DROP TABLE IF EXISTS scores;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS schema_migrations;
 
-CREATE TABLE sessions (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_type TEXT NOT NULL,
-    session_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    subjective_feel INTEGER CHECK(subjective_feel >= 1 AND subjective_feel <= 5),
-    user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
-CREATE TABLE drills (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_id INTEGER NOT NULL,
-    drill_name TEXT NOT NULL,
-    club TEXT,
-    target_distance INTEGER,
-    balls_hit INTEGER,
-    success_metric TEXT,
-    FOREIGN KEY (session_id) REFERENCES sessions (id)
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    is_admin INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE courses (
@@ -52,9 +42,29 @@ CREATE TABLE journal_entries (
     mental_state TEXT,
     physical_state TEXT,
     weather TEXT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     FOREIGN KEY (course_id) REFERENCES courses (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_type TEXT NOT NULL,
+    session_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    subjective_feel INTEGER CHECK(subjective_feel >= 1 AND subjective_feel <= 5),
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE drills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL,
+    drill_name TEXT NOT NULL,
+    club TEXT,
+    target_distance INTEGER,
+    balls_hit INTEGER,
+    success_metric TEXT,
+    FOREIGN KEY (session_id) REFERENCES sessions (id)
 );
 
 CREATE TABLE scores (
@@ -65,17 +75,4 @@ CREATE TABLE scores (
     UNIQUE(journal_entry_id, hole_id),
     FOREIGN KEY (journal_entry_id) REFERENCES journal_entries (id),
     FOREIGN KEY (hole_id) REFERENCES holes (id)
-);
-
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    is_admin INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE schema_migrations (
-    id TEXT PRIMARY KEY,
-    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

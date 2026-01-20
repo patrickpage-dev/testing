@@ -11,6 +11,23 @@
 </head>
 <body>
     <div class="container">
+        <header class="site-header">
+            <div class="brand">
+                <h1>Golf Practice Tracker</h1>
+                <div class="tagline">Improvement happens here</div>
+                <div class="auth-meta">Signed in as {{ current_user.username }}</div>
+            </div>
+            <div class="site-nav">
+                <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="btn btn-ghost" href="{{ url_for('journal_list') }}">Journal</a>
+                <a class="btn btn-ghost" href="{{ url_for('course_list') }}">Courses</a>
+                <form method="post" action="{{ url_for('logout') }}" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-ghost">Log Out</button>
+                </form>
+            </div>
+        </header>
+
         <h1 class="page-title">Edit {{ course.name }}</h1>
         {% if error %}
         <p class="alert">{{ error }}</p>
