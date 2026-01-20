@@ -64,6 +64,24 @@ To get the Golf Practice Tracker up and running on your local machine, follow th
     flask --app app init-db
     ```
 
+## Environment Variables
+
+You can configure the app using environment variables (optional for local use):
+
+*   `SECRET_KEY`: Used for session security. Set this to a unique, random value.
+*   `FLASK_DEBUG`: Set to `1`, `true`, or `yes` to enable debug mode.
+*   `ADMIN_USERNAME`: Optional bootstrap admin username (creates user if missing).
+*   `ADMIN_PASSWORD`: Optional bootstrap admin password (creates user if missing).
+
+Example (PowerShell):
+
+```powershell
+$env:SECRET_KEY="replace-with-a-random-value"
+$env:FLASK_DEBUG="1"
+$env:ADMIN_USERNAME="admin"
+$env:ADMIN_PASSWORD="change-this"
+```
+
 ## How to Use
 
 1.  **Run the Flask application**:

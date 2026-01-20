@@ -35,6 +35,20 @@ body{
   line-height: 1.45;
 }
 
+body.dark-mode{
+  --bg: #0b0f0d;
+  --surface: #101826;
+  --surface-2: #0f1723;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: rgba(229, 231, 235, 0.12);
+  --shadow: 0 12px 30px rgba(2, 6, 23, 0.45);
+  --shadow-sm: 0 6px 16px rgba(2, 6, 23, 0.35);
+  background: radial-gradient(1200px 700px at 20% 0%, rgba(11,61,46,0.24), transparent 55%),
+              radial-gradient(900px 500px at 90% 20%, rgba(199,162,74,0.18), transparent 60%),
+              var(--bg);
+}
+
 /* Layout container */
 .container{
   width: min(1100px, calc(100% - 32px));
@@ -71,6 +85,13 @@ body{
 .brand .tagline{
   color: var(--muted);
   font-size: 13px;
+}
+
+.brand .auth-meta{
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 2px;
 }
 
 /* Buttons */
@@ -147,6 +168,30 @@ body{
   font-size: 16px;
 }
 
+
+.course-link-card{
+  display: block;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--green-2), var(--green));
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-link-card:hover{
+  box-shadow: 0 14px 34px rgba(11,61,46,0.22);
+  transform: translateY(-1px);
+}
+
+.course-link-disabled{
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .meta{
   color: var(--muted);
   font-size: 13px;
@@ -204,6 +249,21 @@ input:focus, select:focus, textarea:focus{
   box-shadow: 0 0 0 4px rgba(11,61,46,0.12);
 }
 
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea{
+  background: rgba(15, 23, 42, 0.85);
+  color: var(--text);
+}
+
+body.dark-mode .header{
+  background: rgba(15, 23, 42, 0.7);
+}
+
+body.dark-mode .table th{
+  background: rgba(15, 23, 42, 0.6);
+}
+
 /* Tables (scorecard/journal stats) */
 .table{
   width: 100%;
@@ -226,6 +286,56 @@ input:focus, select:focus, textarea:focus{
 }
 
 .table tr:last-child td{ border-bottom: 0; }
+
+/* Scorecard layout */
+.scorecard-wrap{
+  overflow-x: auto;
+}
+
+.scorecard-table{
+  min-width: 760px;
+}
+
+.scorecard-table th,
+.scorecard-table td{
+  text-align: center;
+  white-space: nowrap;
+}
+
+.scorecard-table .row-label{
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--surface-2);
+  z-index: 1;
+}
+
+.scorecard-table .total-cell{
+  font-weight: 700;
+  background: rgba(11,61,46,0.06);
+}
+
+.score-input{
+  width: 56px;
+  text-align: center;
+  padding: 8px 6px;
+}
+
+.scorecard-filters{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 16px 0 20px;
+  align-items: end;
+}
+
+.best-round{
+  background: rgba(199,162,74,0.15);
+}
+
+.best-to-par{
+  background: rgba(15,90,66,0.12);
+}
 
 /* Alerts */
 .alert{

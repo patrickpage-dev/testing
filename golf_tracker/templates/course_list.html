@@ -13,18 +13,33 @@
     <div class="container">
         <h1 class="page-title">Golf Courses</h1>
         <p class="page-subtitle">Add and manage your favorite golf courses.</p>
+        {% if current_user.is_authenticated and current_user.is_admin %}
         <div style="margin-bottom: 20px;">
             <a href="{{ url_for('add_course') }}" class="btn btn-primary">+ Add New Course</a>
         </div>
+        {% endif %}
         <div class="grid">
             {% for course in courses %}
             <div class="card third">
-                <h3>{{ course.name }}</h3>
+                {% if course.website_url %}
+                    <a class="course-link-card" href="{{ course.website_url }}" target="_blank" rel="noopener">
+                        {{ course.name }}
+                    </a>
+                {% else %}
+                    <div class="course-link-card course-link-disabled">
+                        {{ course.name }}
+                        <div class="meta">Add website URL to enable link</div>
+                    </div>
+                {% endif %}
                 <div class="meta">Par: {{ course.par }}</div>
                 <div class="meta">Course Rating: {{ course.course_rating }}</div>
                 <div class="meta">Slope: {{ course.slope }}</div>
-                <div style="margin-top: 15px;">
-                    <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="btn">Define Holes</a>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                        <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="btn">New Round</a>
+                        <a href="{{ url_for('edit_course', course_id=course.id) }}" class="btn btn-ghost">Edit</a>
+                    {% endif %}
+                    <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn">History</a>
                 </div>
             </div>
             {% else %}
@@ -33,7 +48,7 @@
             </div>
             {% endfor %}
         </div>
-        <p style="margin-top: 20px;"><a href="{{ url_for('index') }}" class="btn btn-ghost">Back to Practice Sessions</a></p>
+        <p style="margin-top: 20px;"><a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Back to Practice Sessions</a></p>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

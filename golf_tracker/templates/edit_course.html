@@ -7,40 +7,42 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <title>Add Course</title>
+    <title>Edit Course</title>
 </head>
 <body>
     <div class="container">
-        <h1 class="page-title">Add New Golf Course</h1>
+        <h1 class="page-title">Edit {{ course.name }}</h1>
         <form method="post" class="form">
             <div class="field">
                 <label for="name">Course Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" value="{{ course.name }}" required>
             </div>
 
             <div class="field">
                 <label for="par">Par:</label>
-                <input type="number" id="par" name="par" min="1" required>
+                <input type="number" id="par" name="par" min="1" value="{{ course.par }}" required>
             </div>
 
             <div class="field">
                 <label for="course_rating">Course Rating:</label>
-                <input type="number" id="course_rating" name="course_rating" step="0.1" required>
+                <input type="number" id="course_rating" name="course_rating" step="0.1" value="{{ course.course_rating }}" required>
             </div>
 
             <div class="field">
                 <label for="slope">Slope:</label>
-                <input type="number" id="slope" name="slope" min="55" max="155" required>
+                <input type="number" id="slope" name="slope" min="55" max="155" value="{{ course.slope }}" required>
             </div>
 
             <div class="field">
                 <label for="website_url">Course Website URL:</label>
-                <input type="url" id="website_url" name="website_url" placeholder="https://example.com">
+                <input type="url" id="website_url" name="website_url" placeholder="https://example.com" value="{{ course.website_url or '' }}">
             </div>
 
-            <button type="submit" class="btn btn-primary">Add Course</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
-        <p style="margin-top: 20px;"><a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a></p>
+        <p style="margin-top: 20px;">
+            <a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a>
+        </p>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

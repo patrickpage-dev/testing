@@ -12,14 +12,44 @@
 <body>
     <div class="container">
         <h1 class="page-title">Define Holes for {{ course.name }}</h1>
-        <p class="page-subtitle">Enter the Par for each hole:</p>
+        <p class="page-subtitle">Enter the Par for each hole in a scorecard layout:</p>
         <form method="post" class="form">
-            {% for hole in holes %}
-            <div class="field">
-                <label for="hole_{{ hole.hole_number }}_par">Hole {{ hole.hole_number }} Par:</label>
-                <input type="number" id="hole_{{ hole.hole_number }}_par" name="hole_{{ hole.hole_number }}_par" min="1" max="7" value="{{ hole.par }}" required>
+            <div class="scorecard-wrap">
+                <table class="table scorecard-table" data-scorecard>
+                    <thead>
+                        <tr>
+                            <th class="row-label">Hole</th>
+                            {% for hole in holes %}
+                                <th>{{ hole.hole_number }}</th>
+                                {% if hole.hole_number == 9 %}
+                                    <th>Out</th>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <th>In</th>
+                                    <th>Total</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="row-label">Par</th>
+                            {% for hole in holes %}
+                                <td>
+                                    <input class="score-input" type="number" id="hole_{{ hole.hole_number }}_par" name="hole_{{ hole.hole_number }}_par" min="1" max="7" value="{{ hole.par }}" data-score-type="current" data-hole-number="{{ hole.hole_number }}" required>
+                                </td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell"><span data-total-for="current-out">0</span></td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell"><span data-total-for="current-in">0</span></td>
+                                    <td class="total-cell"><span data-total-for="current-total">0</span></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            {% endfor %}
             <button type="submit" class="btn btn-primary">Save Hole Pars</button>
         </form>
         <p style="margin-top: 20px;"><a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Course List</a></p>

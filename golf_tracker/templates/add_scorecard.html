@@ -14,17 +14,77 @@
         <h1 class="page-title">Add Scorecard for {{ course_name }}</h1>
         <p class="page-subtitle">Journal Entry ID: {{ journal_entry.id }}</p>
         <form method="post" class="form">
-            <div class="scorecard-grid">
-                {% for hole in holes %}
-                <div class="field hole-input">
-                    <label for="hole_{{ hole.hole_number }}_score">Hole {{ hole.hole_number }} (Par {{ hole.par }}):</label>
-                    <input type="number" id="hole_{{ hole.hole_number }}_score" name="hole_{{ hole.hole_number }}_score" min="1" value="{{ scores_data.get(hole.hole_number, '') }}" required>
-                </div>
-                {% endfor %}
+            <div class="scorecard-wrap">
+                <table class="table scorecard-table" data-scorecard>
+                    <thead>
+                        <tr>
+                            <th class="row-label">Hole</th>
+                            {% for hole in holes %}
+                                <th>{{ hole.hole_number }}</th>
+                                {% if hole.hole_number == 9 %}
+                                    <th>Out</th>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <th>In</th>
+                                    <th>Total</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="row-label">Par</th>
+                            {% for hole in holes %}
+                                <td class="scorecell" data-score-type="par" data-score-value="{{ hole.par }}">{{ hole.par }}</td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell">{{ par_out }}</td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell">{{ par_in }}</td>
+                                    <td class="total-cell">{{ par_total }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% if previous_entry_label %}
+                        <tr>
+                            <th class="row-label">Last Round ({{ previous_entry_label }})</th>
+                            {% for hole in holes %}
+                                {% set last_score = last_scores.get(hole.hole_number) %}
+                                <td class="scorecell" data-score-type="last" data-score-value="{{ last_score if last_score is not none else '' }}">{{ last_score if last_score is not none else '-' }}</td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell">{{ last_out if last_out is not none else '-' }}</td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell">{{ last_in if last_in is not none else '-' }}</td>
+                                    <td class="total-cell">{{ last_total if last_total is not none else '-' }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th class="row-label">This Round</th>
+                            {% for hole in holes %}
+                                <td>
+                                    <input class="score-input" type="number" id="hole_{{ hole.hole_number }}_score" name="hole_{{ hole.hole_number }}_score" min="1" value="{{ scores_data.get(hole.hole_number, '') }}" data-score-type="current" data-hole-number="{{ hole.hole_number }}" required>
+                                </td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell"><span data-total-for="current-out">0</span></td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell"><span data-total-for="current-in">0</span></td>
+                                    <td class="total-cell"><span data-total-for="current-total">0</span></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <button type="submit" class="btn btn-primary">Save Scorecard</button>
         </form>
-        <p style="margin-top: 20px;"><a href="{{ url_for('journal_details', entry_id=journal_entry.id) }}" class="btn btn-ghost">Back to Journal Entry Details</a></p>
+        <p style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{{ url_for('journal_details', entry_id=journal_entry.id) }}" class="btn btn-ghost">Back to Journal Entry Details</a>
+            <a href="{{ url_for('course_details', course_id=course_id) }}" class="btn btn-ghost">View Course History</a>
+        </p>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

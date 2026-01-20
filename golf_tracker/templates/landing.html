@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <title>Golf Practice Tracker</title>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="brand">
+                <h1>Golf Practice Tracker</h1>
+                <div class="tagline">Improvement happens here</div>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn btn-primary" href="{{ url_for('login') }}">Log In</a>
+                <a class="btn btn-ghost" href="{{ url_for('register') }}">Sign Up</a>
+            </div>
+        </header>
+
+        <div class="card" style="margin-top: 26px;">
+            <h2 class="page-title" style="font-size: 28px; margin-top: 0;">Track practice with purpose</h2>
+            <p class="page-subtitle">Log sessions, keep a golf journal, and compare rounds with a clean scorecard view.</p>
+            <div class="grid">
+                <div class="card half">
+                    <h3>Practice sessions</h3>
+                    <div class="meta">Range, putting, short game — log drills and how the session felt.</div>
+                </div>
+                <div class="card half">
+                    <h3>Scorecards & journal</h3>
+                    <div class="meta">Tie rounds to courses, track hole-by-hole scores, and record notes.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

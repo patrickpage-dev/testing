@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <title>{{ course.name }} Scorecard History</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">{{ course.name }}</h1>
+        <p class="page-subtitle">Scorecard history and course details.</p>
+        <div class="card">
+            <div class="meta">Par: {{ course.par }}</div>
+            <div class="meta">Course Rating: {{ course.course_rating }}</div>
+            <div class="meta">Slope: {{ course.slope }}</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="btn">New Round</a>
+                    <a href="{{ url_for('edit_course', course_id=course.id) }}" class="btn btn-ghost">Edit Course</a>
+                {% endif %}
+                <a href="{{ url_for('add_journal_entry') }}" class="btn btn-primary">+ New Journal Entry</a>
+            </div>
+        </div>
+
+
+        <h2 class="page-title" style="font-size: 26px;">Scorecard History</h2>
+
+        <form method="get" class="scorecard-filters">
+            <div class="field">
+                <label for="year">Year</label>
+                <select id="year" name="year">
+                    <option value="">All</option>
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="month">Month</label>
+                <select id="month" name="month">
+                    <option value="">All</option>
+                    {% for month in available_months %}
+                        <option value="{{ month.value }}" {% if selected_month == month.value %}selected{% endif %}>{{ month.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="view">View</label>
+                <select id="view" name="view">
+                    <option value="all" {% if selected_view == 'all' %}selected{% endif %}>All Rounds</option>
+                    <option value="best" {% if selected_view == 'best' %}selected{% endif %}>Best Round</option>
+                    <option value="best_to_par" {% if selected_view == 'best_to_par' %}selected{% endif %}>Best To Par</option>
+                    <option value="average" {% if selected_view == 'average' %}selected{% endif %}>Average</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="limit">Limit</label>
+                <select id="limit" name="limit">
+                    <option value="10" {% if selected_limit == '10' %}selected{% endif %}>Last 10</option>
+                    <option value="20" {% if selected_limit == '20' %}selected{% endif %}>Last 20</option>
+                    <option value="50" {% if selected_limit == '50' %}selected{% endif %}>Last 50</option>
+                    <option value="all" {% if selected_limit == 'all' %}selected{% endif %}>All</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </div>
+        </form>
+
+        {% if not holes %}
+            <p class="alert">Define the holes for this course to start tracking scorecards.</p>
+        {% else %}
+            <div class="scorecard-wrap">
+                <table class="table scorecard-table">
+                    <thead>
+                        <tr>
+                            <th class="row-label">Round</th>
+                            {% for hole in holes %}
+                                <th>{{ hole.hole_number }}</th>
+                                {% if hole.hole_number == 9 %}
+                                    <th>Out</th>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <th>In</th>
+                                    <th>Total</th>
+                                    <th>To Par</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="row-label">Par</th>
+                            {% for hole in holes %}
+                                <td class="scorecell" data-score-type="par" data-score-value="{{ hole.par }}">{{ hole.par }}</td>
+                                {% if hole.hole_number == 9 %}
+                                    <td class="total-cell">{{ par_out }}</td>
+                                {% endif %}
+                                {% if hole.hole_number == 18 %}
+                                    <td class="total-cell">{{ par_in }}</td>
+                                    <td class="total-cell">{{ par_total }}</td>
+                                    <td class="total-cell">-</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% if entry_rows %}
+                            {% for entry in entry_rows %}
+                                <tr class="{% if entry.is_best %}best-round{% endif %}{% if entry.is_best_to_par %} best-to-par{% endif %}">
+                                    <th class="row-label">
+                                        {% if entry.id %}
+                                            <a href="{{ url_for('journal_details', entry_id=entry.id) }}">{{ entry.label }}</a>
+                                        {% else %}
+                                            {{ entry.label }}
+                                        {% endif %}
+                                    </th>
+                                    {% for hole in holes %}
+                                        {% set score = entry.scores.get(hole.hole_number) %}
+                                        <td class="scorecell" data-score-type="history">
+                                            {% if score is not none %}
+                                                {% if score is number and score != score|int %}
+                                                    {{ '%.1f'|format(score) }}
+                                                {% else %}
+                                                    {{ score }}
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        {% if hole.hole_number == 9 %}
+                                            <td class="total-cell">
+                                                {% if entry.out_total is not none %}
+                                                    {% if entry.out_total is number and entry.out_total != entry.out_total|int %}
+                                                        {{ '%.1f'|format(entry.out_total) }}
+                                                    {% else %}
+                                                        {{ entry.out_total }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                        {% if hole.hole_number == 18 %}
+                                            <td class="total-cell">
+                                                {% if entry.in_total is not none %}
+                                                    {% if entry.in_total is number and entry.in_total != entry.in_total|int %}
+                                                        {{ '%.1f'|format(entry.in_total) }}
+                                                    {% else %}
+                                                        {{ entry.in_total }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td class="total-cell">
+                                                {% if entry.total is not none %}
+                                                    {% if entry.total is number and entry.total != entry.total|int %}
+                                                        {{ '%.1f'|format(entry.total) }}
+                                                    {% else %}
+                                                        {{ entry.total }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td class="total-cell">
+                                                {% if entry.to_par is not none %}
+                                                    {% if entry.to_par is number and entry.to_par != entry.to_par|int %}
+                                                        {{ '+' if entry.to_par > 0 else '' }}{{ '%.1f'|format(entry.to_par) }}
+                                                    {% else %}
+                                                        {{ '+' if entry.to_par > 0 else '' }}{{ entry.to_par }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ holes|length + 5 }}" class="meta">No rounds logged yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <p style="margin-top: 20px; text-align: center;">
+            <a href="{{ url_for('course_list') }}" class="btn btn-ghost">Back to Courses</a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Back to Practice Sessions</a>
+        </p>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -9,7 +9,9 @@ CREATE TABLE sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_type TEXT NOT NULL,
     session_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    subjective_feel INTEGER CHECK(subjective_feel >= 1 AND subjective_feel <= 5)
+    subjective_feel INTEGER CHECK(subjective_feel >= 1 AND subjective_feel <= 5),
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE drills (
@@ -28,7 +30,8 @@ CREATE TABLE courses (
     name TEXT NOT NULL UNIQUE,
     par INTEGER,
     course_rating REAL,
-    slope INTEGER
+    slope INTEGER,
+    website_url TEXT
 );
 
 CREATE TABLE holes (
@@ -49,7 +52,9 @@ CREATE TABLE journal_entries (
     mental_state TEXT,
     physical_state TEXT,
     weather TEXT,
-    FOREIGN KEY (course_id) REFERENCES courses (id)
+    user_id INTEGER,
+    FOREIGN KEY (course_id) REFERENCES courses (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE scores (
@@ -60,4 +65,12 @@ CREATE TABLE scores (
     UNIQUE(journal_entry_id, hole_id),
     FOREIGN KEY (journal_entry_id) REFERENCES journal_entries (id),
     FOREIGN KEY (hole_id) REFERENCES holes (id)
+);
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    is_admin INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

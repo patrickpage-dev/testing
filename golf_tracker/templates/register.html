@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <title>Create Account</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">Create Account</h1>
+        <p class="page-subtitle">Sign up to track your own rounds.</p>
+        <form method="post" class="form">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="field">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            {% if error %}
+            <p class="alert">{{ error }}</p>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+        <p style="margin-top: 20px;">
+            <a href="{{ url_for('login') }}" class="btn btn-ghost">Already have an account?</a>
+        </p>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
