@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Add Scorecard for {{ course_name }}</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Scorecard for {{ course_name }}</h1>
+        <p>Journal Entry ID: {{ journal_entry.id }}</p>
+        <form method="post">
+            <div class="scorecard-grid">
+                {% for hole in holes %}
+                <div class="hole-input">
+                    <label for="hole_{{ hole.hole_number }}_score">Hole {{ hole.hole_number }} (Par {{ hole.par }}):</label>
+                    <input type="number" id="hole_{{ hole.hole_number }}_score" name="hole_{{ hole.hole_number }}_score" min="1" value="{{ scores_data.get(hole.hole_number, '') }}" required>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="button">Save Scorecard</button>
+        </form>
+        <p><a href="{{ url_for('journal_details', entry_id=journal_entry.id) }}">Back to Journal Entry Details</a></p>
+    </div>
+</body>
+</html>

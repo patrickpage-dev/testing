@@ -197,6 +197,75 @@ a:hover {
     background: #5a8844;
 }
 
+/* Scorecard Specific Styles */
+.scorecard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.hole-input {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+body.dark-mode .hole-input {
+    background: #505050;
+    border: 1px solid #757575;
+}
+
+.scorecard-display table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.scorecard-display th, .scorecard-display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    color: #333;
+}
+
+body.dark-mode .scorecard-display th,
+body.dark-mode .scorecard-display td {
+    border: 1px solid #616161;
+    color: #e0e0e0;
+}
+
+.scorecard-display th {
+    background-color: #004d2a; /* Augusta green for table headers */
+    color: #f0e9d6;
+    font-weight: bold;
+}
+
+body.dark-mode .scorecard-display th {
+    background-color: #33691E;
+    color: #e0e0e0;
+}
+
+.scorecard-display tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+body.dark-mode .scorecard-display tr:nth-child(even) {
+    background-color: #424242;
+}
+
+.scorecard-display p {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #004d2a;
+}
+
+body.dark-mode .scorecard-display p {
+    color: #aed581;
+}
+
 .personal-branding {
     margin-top: 40px;
     text-align: center;
@@ -220,4 +289,73 @@ body.dark-mode .personal-branding a {
 
 .personal-branding a:hover {
     text-decoration: underline;
+}
+
+/* Scorecard Specific Styles */
+.scorecard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.hole-input {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+body.dark-mode .hole-input {
+    background: #505050;
+    border: 1px solid #757575;
+}
+
+.scorecard-display table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.scorecard-display th, .scorecard-display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    color: #333;
+}
+
+body.dark-mode .scorecard-display th,
+body.dark-mode .scorecard-display td {
+    border: 1px solid #616161;
+    color: #e0e0e0;
+}
+
+.scorecard-display th {
+    background-color: #004d2a; /* Augusta green for table headers */
+    color: #f0e9d6;
+    font-weight: bold;
+}
+
+body.dark-mode .scorecard-display th {
+    background-color: #33691E;
+    color: #e0e0e0;
+}
+
+.scorecard-display tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+body.dark-mode .scorecard-display tr:nth-child(even) {
+    background-color: #424242;
+}
+
+.scorecard-display p {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #004d2a;
+}
+
+body.dark-mode .scorecard-display p {
+    color: #aed581;
 }

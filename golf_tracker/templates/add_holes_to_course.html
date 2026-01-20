@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Define Holes for {{ course.name }}</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Define Holes for {{ course.name }}</h1>
+        <p>Enter the Par for each hole:</p>
+        <form method="post">
+            {% for hole in holes %}
+            <label for="hole_{{ hole.hole_number }}_par">Hole {{ hole.hole_number }} Par:</label>
+            <input type="number" id="hole_{{ hole.hole_number }}_par" name="hole_{{ hole.hole_number }}_par" min="1" max="7" value="{{ hole.par }}" required>
+            {% endfor %}
+            <button type="submit" class="button">Save Hole Pars</button>
+        </form>
+        <p><a href="{{ url_for('course_list') }}">Back to Course List</a></p>
+    </div>
+</body>
+</html>

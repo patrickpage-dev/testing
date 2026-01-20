@@ -10,8 +10,34 @@
     <div class="container">
         <h1>Journal Entry Details</h1>
         <div class="session-card">
-            <h2>Entry on {{ entry.entry_date.strftime('%Y-%m-%d %H:%M') }}</h2>
-            <p><strong>Round Stats:</strong> {{ entry.round_stats if entry.round_stats else 'N/A' }}</p>
+            <h2>Entry on {{ entry.entry_date.strftime('%Y-%m-%d %H:%M') }}{% if entry.course_name %} at {{ entry.course_name }}{% endif %}</h2>
+            {% if scorecard %}
+            <h3>Scorecard:</h3>
+            <div class="scorecard-display">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hole</th>
+                            <th>Par</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hole in scorecard %}
+                        <tr>
+                            <td>{{ hole.hole_number }}</td>
+                            <td>{{ hole.par }}</td>
+                            <td>{{ hole.score }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p><strong>Total Score:</strong> {{ total_score }} ({{ '+' if score_difference > 0 else '' }}{{ score_difference }})</p>
+                <p><a href="{{ url_for('add_scorecard', journal_entry_id=entry.id) }}" class="button">Edit Scorecard</a></p>
+            </div>
+            {% elif entry.course_id %}
+            <p>No scorecard entered for this round yet. <a href="{{ url_for('add_scorecard', journal_entry_id=entry.id) }}" class="button">Add Scorecard</a></p>
+            {% endif %}
             <p><strong>Notes Before Round:</strong> {{ entry.notes_before_round if entry.notes_before_round else 'N/A' }}</p>
             <p><strong>Notes After Round:</strong> {{ entry.notes_after_round if entry.notes_after_round else 'N/A' }}</p>
             <p><strong>Mental State:</strong> {{ entry.mental_state if entry.mental_state else 'N/A' }}</p>

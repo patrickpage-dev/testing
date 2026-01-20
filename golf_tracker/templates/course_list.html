@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Golf Courses</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Golf Courses</h1>
+        <a href="{{ url_for('add_course') }}" class="button">Add New Course</a>
+        <div class="course-list">
+            {% for course in courses %}
+            <div class="session-card">
+                <h2>{{ course.name }}</h2>
+                <p>Par: {{ course.par }}</p>
+                <p>Course Rating: {{ course.course_rating }}</p>
+                <p>Slope: {{ course.slope }}</p>
+                <a href="{{ url_for('add_holes_to_course', course_id=course.id) }}" class="button">Define Holes</a>
+            </div>
+            {% else %}
+            <p>No courses added yet. <a href="{{ url_for('add_course') }}">Add your first course!</a></p>
+            {% endfor %}
+        </div>
+        <p><a href="{{ url_for('index') }}">Back to Practice Sessions</a></p>
+    </div>
+</body>
+</html>

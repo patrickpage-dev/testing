@@ -13,6 +13,14 @@
             <label for="round_stats">Round Stats (e.g., Score, Putts, Fairways Hit, GIR):</label>
             <textarea id="round_stats" name="round_stats" rows="4"></textarea>
 
+            <label for="course_id">Golf Course:</label>
+            <select id="course_id" name="course_id">
+                <option value="">-- Select Course (Optional) --</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}">{{ course.name }}</option>
+                {% endfor %}
+            </select>
+
             <label for="notes_before_round">Notes Before Round:</label>
             <textarea id="notes_before_round" name="notes_before_round" rows="4"></textarea>
 
