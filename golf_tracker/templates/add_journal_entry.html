@@ -13,6 +13,7 @@
     <div class="container">
         <h1 class="page-title">Add New Journal Entry</h1>
         <form method="post" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="field">
                 <label for="course_id">Golf Course:</label>
                 <select id="course_id" name="course_id">

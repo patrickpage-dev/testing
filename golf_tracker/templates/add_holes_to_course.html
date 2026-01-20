@@ -13,7 +13,11 @@
     <div class="container">
         <h1 class="page-title">Define Holes for {{ course.name }}</h1>
         <p class="page-subtitle">Enter the Par for each hole in a scorecard layout:</p>
+        {% if error %}
+        <p class="alert">{{ error }}</p>
+        {% endif %}
         <form method="post" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="scorecard-wrap">
                 <table class="table scorecard-table" data-scorecard>
                     <thead>

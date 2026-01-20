@@ -68,7 +68,7 @@ To get the Golf Practice Tracker up and running on your local machine, follow th
 
 You can configure the app using environment variables (optional for local use):
 
-*   `SECRET_KEY`: Used for session security. Set this to a unique, random value.
+*   `SECRET_KEY`: Used for session security. Required outside debug.
 *   `FLASK_DEBUG`: Set to `1`, `true`, or `yes` to enable debug mode.
 *   `ADMIN_USERNAME`: Optional bootstrap admin username (creates user if missing).
 *   `ADMIN_PASSWORD`: Optional bootstrap admin password (creates user if missing).
@@ -80,6 +80,14 @@ $env:SECRET_KEY="replace-with-a-random-value"
 $env:FLASK_DEBUG="1"
 $env:ADMIN_USERNAME="admin"
 $env:ADMIN_PASSWORD="change-this"
+```
+
+## Database Migrations
+
+If you already have a database and want to apply schema updates without wiping data:
+
+```bash
+flask --app app migrate-db
 ```
 
 ## How to Use
@@ -107,6 +115,10 @@ $env:ADMIN_PASSWORD="change-this"
 *   **Data Visualization & Insights:** Implement charts and graphs to visualize trends, identify weak areas, correlate practice with performance, and analyze mental/physical states.
 *   **Search and Filtering:** Enhance the ability to search and filter sessions and journal entries.
 *   **User Authentication:** (If desired) Add user accounts to manage personal data.
+
+## Notes
+
+SQLite is great for local/single-user usage, but it has concurrency limits. If you plan to scale, consider moving to Postgres or MySQL.
 
 ## Credits / Contact
 

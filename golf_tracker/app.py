@@ -4,16 +4,24 @@ import io
 import os
 import calendar
 import statistics
+import importlib.util
+from pathlib import Path
 from flask import Flask, render_template, request, g, redirect, url_for, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_wtf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 
 DATABASE = 'instance/golf_tracker.db'
-_SCHEMA_CHECKED = False
 
 app = Flask(__name__)
+debug_enabled = os.environ.get('FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
+secret_key = os.environ.get('SECRET_KEY')
+if not secret_key and not debug_enabled:
+    raise RuntimeError('SECRET_KEY not set')
 app.config.from_mapping(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
+    SECRET_KEY=secret_key or 'dev',
     DATABASE=DATABASE,
 )
 
@@ -21,55 +29,8 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
-def ensure_schema(db):
-    columns = db.execute('PRAGMA table_info(courses)').fetchall()
-    column_names = {column['name'] for column in columns}
-    if 'website_url' not in column_names:
-        db.execute('ALTER TABLE courses ADD COLUMN website_url TEXT')
-        db.commit()
-
-    session_columns = db.execute('PRAGMA table_info(sessions)').fetchall()
-    session_column_names = {column['name'] for column in session_columns}
-    if 'user_id' not in session_column_names:
-        db.execute('ALTER TABLE sessions ADD COLUMN user_id INTEGER')
-        db.commit()
-
-    journal_columns = db.execute('PRAGMA table_info(journal_entries)').fetchall()
-    journal_column_names = {column['name'] for column in journal_columns}
-    if 'user_id' not in journal_column_names:
-        db.execute('ALTER TABLE journal_entries ADD COLUMN user_id INTEGER')
-        db.commit()
-
-    db.execute(
-        'CREATE TABLE IF NOT EXISTS users ('
-        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-        'username TEXT NOT NULL UNIQUE, '
-        'password_hash TEXT NOT NULL, '
-        'is_admin INTEGER NOT NULL DEFAULT 0, '
-        'created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'
-        ')'
-    )
-    db.commit()
-
-    user_columns = db.execute('PRAGMA table_info(users)').fetchall()
-    user_column_names = {column['name'] for column in user_columns}
-    if 'is_admin' not in user_column_names:
-        db.execute('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0')
-        db.commit()
-
-    admin_username = os.environ.get('ADMIN_USERNAME')
-    admin_password = os.environ.get('ADMIN_PASSWORD')
-    if admin_username and admin_password:
-        existing = db.execute('SELECT id FROM users WHERE username = ?', (admin_username,)).fetchone()
-        if existing is None:
-            db.execute(
-                'INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, 1)',
-                (admin_username, generate_password_hash(admin_password))
-            )
-            db.commit()
-        else:
-            db.execute('UPDATE users SET is_admin = 1 WHERE username = ?', (admin_username,))
-            db.commit()
+csrf = CSRFProtect(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=['200 per day', '50 per hour'])
 
 def get_db():
     if 'db' not in g:
@@ -78,10 +39,6 @@ def get_db():
             detect_types=sqlite3.PARSE_DECLTYPES
         )
         g.db.row_factory = sqlite3.Row
-        global _SCHEMA_CHECKED
-        if not _SCHEMA_CHECKED:
-            ensure_schema(g.db)
-            _SCHEMA_CHECKED = True
     return g.db
 
 class User(UserMixin):
@@ -111,10 +68,34 @@ def require_admin():
         return "Admin access required", 403
     return None
 
+def parse_int(value, field_name, min_value=None, max_value=None):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        raise ValueError(f'{field_name} must be a valid number.')
+    if min_value is not None and parsed < min_value:
+        raise ValueError(f'{field_name} must be at least {min_value}.')
+    if max_value is not None and parsed > max_value:
+        raise ValueError(f'{field_name} must be at most {max_value}.')
+    return parsed
+
+def parse_float(value, field_name, min_value=None, max_value=None):
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f'{field_name} must be a valid number.')
+    if min_value is not None and parsed < min_value:
+        raise ValueError(f'{field_name} must be at least {min_value}.')
+    if max_value is not None and parsed > max_value:
+        raise ValueError(f'{field_name} must be at most {max_value}.')
+    return parsed
+
 def close_db(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+app.teardown_appcontext(close_db)
 
 def init_db():
     db = get_db()
@@ -135,11 +116,52 @@ def init_db():
             pass # Or log a warning
     db.commit()
 
+    admin_username = os.environ.get('ADMIN_USERNAME')
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+    if admin_username and admin_password:
+        existing = db.execute('SELECT id FROM users WHERE username = ?', (admin_username,)).fetchone()
+        if existing is None:
+            db.execute(
+                'INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, 1)',
+                (admin_username, generate_password_hash(admin_password))
+            )
+            db.commit()
+
 @app.cli.command('init-db')
 def init_db_command():
     """Clear existing data and create new tables."""
     init_db()
     print('Initialized the database.')
+
+@app.cli.command('migrate-db')
+def migrate_db_command():
+    """Apply versioned migrations from the migrations folder."""
+    db = get_db()
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS schema_migrations ('
+        'id TEXT PRIMARY KEY, '
+        'applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'
+        ')'
+    )
+    db.commit()
+
+    migrations_dir = Path(__file__).parent / 'migrations'
+    if not migrations_dir.exists():
+        print('No migrations directory found.')
+        return
+
+    applied = {row['id'] for row in db.execute('SELECT id FROM schema_migrations').fetchall()}
+    for path in sorted(migrations_dir.glob('*.py')):
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        migration_id = getattr(module, 'MIGRATION_ID', path.stem)
+        if migration_id in applied:
+            continue
+        module.upgrade(db)
+        db.execute('INSERT INTO schema_migrations (id) VALUES (?)', (migration_id,))
+        db.commit()
+        print(f'Applied migration {migration_id}')
 
 @app.route('/')
 def index():
@@ -159,6 +181,7 @@ def dashboard():
     return render_template('index.html', sessions=sessions)
 
 @app.route('/login', methods=('GET', 'POST'))
+@limiter.limit('10 per minute')
 def login():
     if request.method == 'POST':
         username = request.form['username'].strip()
@@ -172,6 +195,7 @@ def login():
     return render_template('login.html', error=None)
 
 @app.route('/register', methods=('GET', 'POST'))
+@limiter.limit('5 per minute')
 def register():
     if request.method == 'POST':
         username = request.form['username'].strip()
@@ -180,6 +204,8 @@ def register():
 
         if not username or not password:
             return render_template('register.html', error='Username and password are required.')
+        if len(password) < 8:
+            return render_template('register.html', error='Password must be at least 8 characters.')
         if password != confirm_password:
             return render_template('register.html', error='Passwords do not match.')
         if get_user_by_username(username):
@@ -211,7 +237,11 @@ def logout():
 def add_session():
     if request.method == 'POST':
         session_type = request.form['session_type']
-        subjective_feel = request.form['subjective_feel']
+        try:
+            subjective_feel = parse_int(request.form['subjective_feel'], 'Subjective feel', 1, 5)
+        except ValueError as exc:
+            return render_template('add_session.html', error=str(exc))
+
         db = get_db()
         cursor = db.execute(
             'INSERT INTO sessions (session_type, subjective_feel, user_id)'
@@ -221,7 +251,7 @@ def add_session():
         db.commit()
         new_session_id = cursor.lastrowid
         return redirect(url_for('add_drill', session_id=new_session_id))
-    return render_template('add_session.html')
+    return render_template('add_session.html', error=None)
 
 @app.route('/session/<int:session_id>/add_drill', methods=('GET', 'POST'))
 @login_required
@@ -237,9 +267,17 @@ def add_drill(session_id):
     if request.method == 'POST':
         drill_name = request.form['drill_name']
         club = request.form['club']
-        target_distance = request.form['target_distance']
-        balls_hit = request.form['balls_hit']
+        target_distance = request.form.get('target_distance') or None
+        balls_hit = request.form.get('balls_hit') or None
         success_metric = request.form['success_metric']
+
+        try:
+            if target_distance is not None:
+                target_distance = parse_int(target_distance, 'Target distance', 0)
+            if balls_hit is not None:
+                balls_hit = parse_int(balls_hit, 'Balls hit', 1)
+        except ValueError as exc:
+            return render_template('add_drill.html', session_id=session_id, error=str(exc))
 
         db.execute(
             'INSERT INTO drills (session_id, drill_name, club, target_distance, balls_hit, success_metric)'
@@ -247,8 +285,8 @@ def add_drill(session_id):
             (session_id, drill_name, club, target_distance, balls_hit, success_metric)
         )
         db.commit()
-        return redirect(url_for('index'))
-    return render_template('add_drill.html', session_id=session_id)
+        return redirect(url_for('dashboard'))
+    return render_template('add_drill.html', session_id=session_id, error=None)
 
 @app.route('/journal')
 @login_required
@@ -373,28 +411,28 @@ def course_details(course_id):
     ).fetchall()
 
     years_rows = db.execute(
-        "SELECT DISTINCT strftime('%Y', entry_date) AS year FROM journal_entries WHERE course_id = ? ORDER BY year DESC",
-        (course_id,)
+        "SELECT DISTINCT strftime('%Y', entry_date) AS year FROM journal_entries WHERE course_id = ? AND user_id = ? ORDER BY year DESC",
+        (course_id, current_user.id)
     ).fetchall()
     available_years = [row['year'] for row in years_rows if row['year']]
 
     if selected_year:
         months_rows = db.execute(
-            "SELECT DISTINCT strftime('%m', entry_date) AS month FROM journal_entries WHERE course_id = ? AND strftime('%Y', entry_date) = ? ORDER BY month DESC",
-            (course_id, selected_year)
+            "SELECT DISTINCT strftime('%m', entry_date) AS month FROM journal_entries WHERE course_id = ? AND user_id = ? AND strftime('%Y', entry_date) = ? ORDER BY month DESC",
+            (course_id, current_user.id, selected_year)
         ).fetchall()
     else:
         months_rows = db.execute(
-            "SELECT DISTINCT strftime('%m', entry_date) AS month FROM journal_entries WHERE course_id = ? ORDER BY month DESC",
-            (course_id,)
+            "SELECT DISTINCT strftime('%m', entry_date) AS month FROM journal_entries WHERE course_id = ? AND user_id = ? ORDER BY month DESC",
+            (course_id, current_user.id)
         ).fetchall()
     available_months = [
         {'value': row['month'], 'label': calendar.month_name[int(row['month'])]}
         for row in months_rows if row['month']
     ]
 
-    entries_query = 'SELECT id, entry_date FROM journal_entries WHERE course_id = ?'
-    query_params = [course_id]
+    entries_query = 'SELECT id, entry_date FROM journal_entries WHERE course_id = ? AND user_id = ?'
+    query_params = [course_id, current_user.id]
 
     if selected_year:
         entries_query += " AND strftime('%Y', entry_date) = ?"
@@ -413,10 +451,12 @@ def course_details(course_id):
 
     scores_rows = db.execute(
         'SELECT s.journal_entry_id, h.hole_number, s.score '
-        'FROM scores s JOIN holes h ON s.hole_id = h.id '
-        'WHERE h.course_id = ? '
+        'FROM scores s '
+        'JOIN holes h ON s.hole_id = h.id '
+        'JOIN journal_entries je ON s.journal_entry_id = je.id '
+        'WHERE h.course_id = ? AND je.user_id = ? '
         'ORDER BY s.journal_entry_id, h.hole_number',
-        (course_id,)
+        (course_id, current_user.id)
     ).fetchall()
 
     scores_by_entry = {}
@@ -545,9 +585,12 @@ def edit_course(course_id):
 
     if request.method == 'POST':
         name = request.form['name']
-        par = request.form['par']
-        course_rating = request.form['course_rating']
-        slope = request.form['slope']
+        try:
+            par = parse_int(request.form['par'], 'Par', 1)
+            course_rating = parse_float(request.form['course_rating'], 'Course rating', 0)
+            slope = parse_int(request.form['slope'], 'Slope', 55, 155)
+        except ValueError as exc:
+            return render_template('edit_course.html', course=course, error=str(exc))
         website_url = request.form.get('website_url') or None
 
         db.execute(
@@ -557,7 +600,7 @@ def edit_course(course_id):
         db.commit()
         return redirect(url_for('course_list'))
 
-    return render_template('edit_course.html', course=course)
+    return render_template('edit_course.html', course=course, error=None)
 
 @app.route('/add_course', methods=('GET', 'POST'))
 @login_required
@@ -567,9 +610,12 @@ def add_course():
         return admin_guard
     if request.method == 'POST':
         name = request.form['name']
-        par = request.form['par']
-        course_rating = request.form['course_rating']
-        slope = request.form['slope']
+        try:
+            par = parse_int(request.form['par'], 'Par', 1)
+            course_rating = parse_float(request.form['course_rating'], 'Course rating', 0)
+            slope = parse_int(request.form['slope'], 'Slope', 55, 155)
+        except ValueError as exc:
+            return render_template('add_course.html', error=str(exc))
         website_url = request.form.get('website_url') or None
 
         db = get_db()
@@ -580,7 +626,7 @@ def add_course():
         )
         db.commit()
         return redirect(url_for('course_list'))
-    return render_template('add_course.html')
+    return render_template('add_course.html', error=None)
 
 @app.route('/add_holes_to_course/<int:course_id>', methods=('GET', 'POST'))
 @login_required
@@ -595,17 +641,31 @@ def add_holes_to_course(course_id):
         return "Course not found", 404
 
     if request.method == 'POST':
-        # Delete existing holes for this course first to allow re-defining
-        db.execute('DELETE FROM holes WHERE course_id = ?', (course_id,))
-
+        holes_to_insert = []
         for i in range(1, 19): # Assuming 18 holes
             par_key = f'hole_{i}_par'
             par_value = request.form.get(par_key)
             if par_value:
-                db.execute(
-                    'INSERT INTO holes (course_id, hole_number, par) VALUES (?, ?, ?)',
-                    (course_id, i, int(par_value))
-                )
+                try:
+                    par_int = parse_int(par_value, f'Hole {i} par', 1, 7)
+                except ValueError as exc:
+                    existing_holes = db.execute(
+                        'SELECT hole_number, par FROM holes WHERE course_id = ? ORDER BY hole_number',
+                        (course_id,)
+                    ).fetchall()
+                    holes_data = {hole['hole_number']: hole['par'] for hole in existing_holes}
+                    holes_for_template = [{'hole_number': n, 'par': holes_data.get(n, 4)} for n in range(1, 19)]
+                    return render_template('add_holes_to_course.html', course=course, holes=holes_for_template, error=str(exc))
+
+                holes_to_insert.append((course_id, i, par_int))
+
+        # Delete existing holes for this course first to allow re-defining
+        db.execute('DELETE FROM holes WHERE course_id = ?', (course_id,))
+        if holes_to_insert:
+            db.executemany(
+                'INSERT INTO holes (course_id, hole_number, par) VALUES (?, ?, ?)',
+                holes_to_insert
+            )
         db.commit()
         return redirect(url_for('course_list')) # Redirect back to course list
 
@@ -618,7 +678,7 @@ def add_holes_to_course(course_id):
     for i in range(1, 19):
         holes_for_template.append({'hole_number': i, 'par': holes_data.get(i, 4)})
 
-    return render_template('add_holes_to_course.html', course=course, holes=holes_for_template)
+    return render_template('add_holes_to_course.html', course=course, holes=holes_for_template, error=None)
 
 @app.route('/add_scorecard/<int:journal_entry_id>', methods=('GET', 'POST'))
 @login_required
@@ -637,51 +697,74 @@ def add_scorecard(journal_entry_id):
     course_id = journal_entry['course_id']
     course_name = journal_entry['course_name']
 
-    if request.method == 'POST':
-        # Delete existing scores for this journal entry first to allow re-entry
-        db.execute('DELETE FROM scores WHERE journal_entry_id = ?', (journal_entry_id,))
-
-        for i in range(1, 19): # Assuming 18 holes for now
-            hole_score_key = f'hole_{i}_score'
-            hole_score = request.form.get(hole_score_key)
-            if hole_score:
-                hole_id_result = db.execute(
-                    'SELECT id FROM holes WHERE course_id = ? AND hole_number = ?',
-                    (course_id, i)
-                ).fetchone()
-                if hole_id_result:
-                    hole_id = hole_id_result['id']
-                    db.execute(
-                        'INSERT INTO scores (journal_entry_id, hole_id, score) VALUES (?, ?, ?)',
-                        (journal_entry_id, hole_id, int(hole_score))
-                    )
-        db.commit()
-        return redirect(url_for('journal_details', entry_id=journal_entry_id))
-
-    # GET request: Prepare data for the scorecard form
     holes = db.execute(
         'SELECT id, hole_number, par FROM holes WHERE course_id = ? ORDER BY hole_number',
         (course_id,)
     ).fetchall()
-    
-    # Fetch existing scores for this journal entry, if any
+
+    if not holes:
+        # If no holes are defined for the course, prompt to define them first
+        return redirect(url_for('add_holes_to_course', course_id=course_id))
+
     existing_scores = db.execute(
         'SELECT h.hole_number, s.score FROM scores s JOIN holes h ON s.hole_id = h.id WHERE s.journal_entry_id = ? ORDER BY h.hole_number',
         (journal_entry_id,)
     ).fetchall()
     scores_data = {score['hole_number']: score['score'] for score in existing_scores}
 
-    if not holes:
-        # If no holes are defined for the course, prompt to define them first
-        return redirect(url_for('add_holes_to_course', course_id=course_id))
+    if request.method == 'POST':
+        scores_to_insert = []
+        for i in range(1, 19): # Assuming 18 holes for now
+            hole_score_key = f'hole_{i}_score'
+            hole_score = request.form.get(hole_score_key)
+            if hole_score:
+                try:
+                    hole_score_int = parse_int(hole_score, f'Hole {i} score', 1)
+                except ValueError as exc:
+                    par_out = sum(hole['par'] for hole in holes if hole['hole_number'] <= 9)
+                    par_in = sum(hole['par'] for hole in holes if hole['hole_number'] > 9)
+                    par_total = par_out + par_in
+                    return render_template(
+                        'add_scorecard.html',
+                        journal_entry=journal_entry,
+                        course_name=course_name,
+                        course_id=course_id,
+                        holes=holes,
+                        scores_data=scores_data,
+                        par_out=par_out,
+                        par_in=par_in,
+                        par_total=par_total,
+                        previous_entry_label=None,
+                        last_scores={},
+                        last_out=None,
+                        last_in=None,
+                        last_total=None,
+                        error=str(exc),
+                    )
+                hole_id_result = db.execute(
+                    'SELECT id FROM holes WHERE course_id = ? AND hole_number = ?',
+                    (course_id, i)
+                ).fetchone()
+                if hole_id_result:
+                    scores_to_insert.append((journal_entry_id, hole_id_result['id'], hole_score_int))
+
+        # Delete existing scores for this journal entry first to allow re-entry
+        db.execute('DELETE FROM scores WHERE journal_entry_id = ?', (journal_entry_id,))
+        if scores_to_insert:
+            db.executemany(
+                'INSERT INTO scores (journal_entry_id, hole_id, score) VALUES (?, ?, ?)',
+                scores_to_insert
+            )
+        db.commit()
+        return redirect(url_for('journal_details', entry_id=journal_entry_id))
 
     par_out = sum(hole['par'] for hole in holes if hole['hole_number'] <= 9)
     par_in = sum(hole['par'] for hole in holes if hole['hole_number'] > 9)
     par_total = par_out + par_in
 
     previous_entry = db.execute(
-        'SELECT id, entry_date FROM journal_entries WHERE course_id = ? AND id != ? ORDER BY entry_date DESC LIMIT 1',
-        (course_id, journal_entry_id)
+        'SELECT id, entry_date FROM journal_entries WHERE course_id = ? AND user_id = ? AND id != ? ORDER BY entry_date DESC LIMIT 1',
+        (course_id, current_user.id, journal_entry_id)
     ).fetchone()
 
     last_scores = {}
@@ -719,6 +802,7 @@ def add_scorecard(journal_entry_id):
         last_out=last_out,
         last_in=last_in,
         last_total=last_total,
+        error=None,
     )
 
 @app.route('/export/sessions_csv')

@@ -12,7 +12,11 @@
 <body>
     <div class="container">
         <h1 class="page-title">Add New Practice Session</h1>
+        {% if error %}
+        <p class="alert">{{ error }}</p>
+        {% endif %}
         <form method="post" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="field">
                 <label for="session_type">Session Type:</label>
                 <select id="session_type" name="session_type" required>
